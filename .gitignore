@@ -1,5 +1,6 @@
 /bin
 /vendor.protogen
+.idea/
 
 # room-service
 /room-service/deployments/.env
