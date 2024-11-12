@@ -1,0 +1,15 @@
+services:
+  swagger-ui:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "8081:8080"
+    volumes:
+      - ../../api/openapi/v1/api.yaml:/spec/api.yaml:ro
+    networks:
+      - hotel-network
+
+networks:
+  hotel-network:
+    driver: bridge

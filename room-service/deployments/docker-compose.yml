@@ -1,0 +1,64 @@
+services:
+  room-service:
+    build:
+      context: ../../  #TODO: переделать контекст, когда будет на отдельном сервере или брать образ из реджестери
+      dockerfile: room-service/deployments/Dockerfile
+    container_name: room-service
+    ports:
+      - "8082:8082" # HTTP port
+      - "9092:9092" # gRPC port
+    depends_on:
+      room-db:
+        condition: service_healthy
+    networks:
+      - hotel-network
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env:ro
+
+  room-db:
+    image: postgres:16-alpine
+    container_name: room-db
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - room-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d room_service"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hotel-network
+    restart: unless-stopped
+
+  # TODO: реализовать потом
+  #kafka:
+  #  image: confluentinc/cp-kafka:7.3.0
+  #  container_name: kafka
+  #  ports:
+  #    - "9092:9092"
+  #  environment:
+  #    KAFKA_BROKER_ID: 1
+  #    KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+  #    KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+  #    KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+  #    KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+  #    KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+  #    KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+  #  networks:
+  #    - hotel-network
+
+volumes:
+  room-db-data:
+    name: room-db-data
+
+networks:
+  hotel-network:
+    name: hotel-network
+    driver: bridge

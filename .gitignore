@@ -1,0 +1,5 @@
+/bin
+/vendor.protogen
+
+# room-service
+/room-service/deployments/.env

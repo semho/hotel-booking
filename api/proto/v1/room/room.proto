@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package hotel.room.v1;
+
+option go_package = "github.com/semho/hotel-booking/api/proto/v1/room";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// Room service definition
+service RoomService {
+  // GetAvailableRooms returns list of available rooms based on search criteria
+  rpc GetAvailableRooms(GetAvailableRoomsRequest) returns (GetAvailableRoomsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rooms"
+    };
+  }
+}
+
+// Room type enumeration
+enum RoomType {
+  ROOM_TYPE_UNSPECIFIED = 0;
+  ROOM_TYPE_STANDARD = 1;
+  ROOM_TYPE_DELUXE = 2;
+  ROOM_TYPE_SUITE = 3;
+}
+
+// Room status enumeration
+enum RoomStatus {
+  ROOM_STATUS_UNSPECIFIED = 0;
+  ROOM_STATUS_AVAILABLE = 1;
+  ROOM_STATUS_OCCUPIED = 2;
+  ROOM_STATUS_MAINTENANCE = 3;
+}
+
+// Room representation
+message Room {
+  string id = 1;
+  string room_number = 2;
+  RoomType type = 3;
+  double price = 4;
+  int32 capacity = 5;
+  RoomStatus status = 6;
+  repeated string amenities = 7;
+}
+
+// Request for getting available rooms
+message GetAvailableRoomsRequest {
+  google.protobuf.Timestamp check_in = 1;
+  google.protobuf.Timestamp check_out = 2;
+  optional int32 capacity = 3;
+  optional RoomType type = 4;
+}
+
+// Response with available rooms
+message GetAvailableRoomsResponse {
+  repeated Room rooms = 1;
+}

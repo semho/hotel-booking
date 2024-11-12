@@ -1,0 +1,10 @@
+# Базовые настройки, приоритет у env файла.
+db:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  name: room_service
+
+grpc:
+  port: 9092

@@ -1,0 +1,495 @@
+openapi: 3.0.3
+info:
+  description: API for hotel room booking system
+  title: Hotel Booking API
+  version: 1.0.0
+servers:
+- description: Local development server
+  url: http://localhost:8080/api/v1
+paths:
+  /rooms:
+    get:
+      description: Returns a list of available rooms based on search criteria
+      parameters:
+      - explode: true
+        in: query
+        name: checkIn
+        required: true
+        schema:
+          format: date
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: checkOut
+        required: true
+        schema:
+          format: date
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: capacity
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: type
+        required: false
+        schema:
+          enum:
+          - STANDARD
+          - DELUXE
+          - SUITE
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Room'
+                type: array
+          description: List of available rooms
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid parameters
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal server error
+      summary: Get available rooms
+      x-accepts: application/json
+  /bookings:
+    post:
+      description: Creates a new booking for a room
+      requestBody:
+        $ref: '#/components/requestBodies/inline_object'
+        content:
+          application/json:
+            schema:
+              properties:
+                roomId:
+                  format: uuid
+                  type: string
+                guestName:
+                  minLength: 2
+                  type: string
+                guestEmail:
+                  format: email
+                  type: string
+                guestPhone:
+                  type: string
+                checkIn:
+                  format: date
+                  type: string
+                checkOut:
+                  format: date
+                  type: string
+              required:
+              - checkIn
+              - checkOut
+              - guestEmail
+              - guestName
+              - roomId
+              type: object
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Booking'
+          description: Booking created successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid request parameters
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Unauthorized
+        "404":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Room not found
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Room already booked
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal server error
+      security:
+      - bearerAuth: []
+      summary: Create a new booking
+      x-contentType: application/json
+      x-accepts: application/json
+  /auth/register:
+    post:
+      description: Create a new user account
+      requestBody:
+        $ref: '#/components/requestBodies/inline_object_1'
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  format: email
+                  type: string
+                password:
+                  minLength: 8
+                  type: string
+                firstName:
+                  minLength: 2
+                  type: string
+                lastName:
+                  minLength: 2
+                  type: string
+                phone:
+                  type: string
+              required:
+              - email
+              - firstName
+              - lastName
+              - password
+              type: object
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: User registered successfully
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid request parameters
+        "409":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: User already exists
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal server error
+      summary: Register a new user
+      x-contentType: application/json
+      x-accepts: application/json
+  /auth/login:
+    post:
+      description: Authenticate user and get access token
+      requestBody:
+        $ref: '#/components/requestBodies/inline_object_2'
+        content:
+          application/json:
+            schema:
+              properties:
+                email:
+                  format: email
+                  type: string
+                password:
+                  minLength: 8
+                  type: string
+              required:
+              - email
+              - password
+              type: object
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+          description: Login successful
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Invalid credentials
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Authentication failed
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Internal server error
+      summary: User login
+      x-contentType: application/json
+      x-accepts: application/json
+components:
+  requestBodies:
+    inline_object_1:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_object_1'
+      required: true
+    inline_object:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_object'
+      required: true
+    inline_object_2:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/inline_object_2'
+      required: true
+  schemas:
+    Error:
+      properties:
+        code:
+          description: Error code
+          type: string
+        message:
+          description: Error message
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    Room:
+      example:
+        amenities:
+        - amenities
+        - amenities
+        roomNumber: roomNumber
+        price: 0.8008282
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        type: STANDARD
+        capacity: 1
+        status: AVAILABLE
+      properties:
+        id:
+          format: uuid
+          type: string
+        roomNumber:
+          type: string
+        type:
+          enum:
+          - STANDARD
+          - DELUXE
+          - SUITE
+          type: string
+        price:
+          format: float
+          type: number
+        capacity:
+          minimum: 1
+          type: integer
+        status:
+          enum:
+          - AVAILABLE
+          - OCCUPIED
+          - MAINTENANCE
+          type: string
+        amenities:
+          items:
+            type: string
+          type: array
+      required:
+      - capacity
+      - id
+      - price
+      - roomNumber
+      - status
+      - type
+      type: object
+    Booking:
+      example:
+        createdAt: 2000-01-23T04:56:07.000+00:00
+        checkIn: 2000-01-23
+        totalPrice: 0.8008282
+        guestPhone: guestPhone
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        guestEmail: guestEmail
+        checkOut: 2000-01-23
+        userId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        roomId: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        guestName: guestName
+        status: PENDING
+      properties:
+        id:
+          format: uuid
+          type: string
+        roomId:
+          format: uuid
+          type: string
+        userId:
+          format: uuid
+          type: string
+        guestName:
+          type: string
+        guestEmail:
+          format: email
+          type: string
+        guestPhone:
+          type: string
+        checkIn:
+          format: date
+          type: string
+        checkOut:
+          format: date
+          type: string
+        status:
+          enum:
+          - PENDING
+          - CONFIRMED
+          - CANCELLED
+          - COMPLETED
+          type: string
+        totalPrice:
+          format: float
+          type: number
+        createdAt:
+          format: date-time
+          type: string
+      required:
+      - checkIn
+      - checkOut
+      - guestEmail
+      - guestName
+      - roomId
+      type: object
+    User:
+      properties:
+        id:
+          format: uuid
+          type: string
+        email:
+          format: email
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        phone:
+          type: string
+        createdAt:
+          format: date-time
+          type: string
+      required:
+      - email
+      - firstName
+      - lastName
+      type: object
+    AuthResponse:
+      example:
+        expiresIn: 0
+        accessToken: accessToken
+        refreshToken: refreshToken
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        expiresIn:
+          description: Token expiration time in seconds
+          type: integer
+      required:
+      - accessToken
+      - expiresIn
+      - refreshToken
+      type: object
+    inline_object:
+      properties:
+        roomId:
+          format: uuid
+          type: string
+        guestName:
+          minLength: 2
+          type: string
+        guestEmail:
+          format: email
+          type: string
+        guestPhone:
+          type: string
+        checkIn:
+          format: date
+          type: string
+        checkOut:
+          format: date
+          type: string
+      required:
+      - checkIn
+      - checkOut
+      - guestEmail
+      - guestName
+      - roomId
+      type: object
+    inline_object_1:
+      properties:
+        email:
+          format: email
+          type: string
+        password:
+          minLength: 8
+          type: string
+        firstName:
+          minLength: 2
+          type: string
+        lastName:
+          minLength: 2
+          type: string
+        phone:
+          type: string
+      required:
+      - email
+      - firstName
+      - lastName
+      - password
+      type: object
+    inline_object_2:
+      properties:
+        email:
+          format: email
+          type: string
+        password:
+          minLength: 8
+          type: string
+      required:
+      - email
+      - password
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
+
