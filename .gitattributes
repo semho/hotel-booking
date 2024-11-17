@@ -1,3 +1,4 @@
 * linguist-detectable=true
 *.go linguist-language=Go
 *.yml linguist-generated=true
+*.yaml linguist-generated=true
