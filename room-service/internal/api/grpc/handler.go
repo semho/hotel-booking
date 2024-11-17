@@ -3,7 +3,7 @@ package grpc
 import (
 	"context"
 	"github.com/semho/hotel-booking/pkg/logger"
-	pb "github.com/semho/hotel-booking/pkg/proto/room_v1"
+	pb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"github.com/semho/hotel-booking/room-service/internal/api/grpc/mapper"
 	"github.com/semho/hotel-booking/room-service/internal/domain/port"
 )
@@ -25,10 +25,9 @@ func (h *RoomHandler) GetAvailableRooms(
 ) (*pb.GetAvailableRoomsResponse, error) {
 	logger.Log.Info(
 		"received GetAvailableRooms request",
-		"check_in", req.CheckIn.AsTime(),
-		"check_out", req.CheckOut.AsTime(),
 		"capacity", req.Capacity,
 		"type", req.Type,
+		"status", req.Status,
 	)
 
 	params := mapper.ToSearchParams(req)

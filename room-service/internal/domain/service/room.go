@@ -22,18 +22,14 @@ func NewRoomService(repo port.RoomRepository) *RoomService {
 func (s *RoomService) GetAvailableRooms(ctx context.Context, params model.SearchParams) ([]model.Room, error) {
 	logger.Log.Info(
 		"getting available rooms with params",
-		"check_in", params.CheckIn,
-		"check_out", params.CheckOut,
 		"capacity", params.Capacity,
 		"type", params.Type,
+		"status", params.Status,
 	)
 
-	if params.CheckIn.IsZero() || params.CheckOut.IsZero() {
-		return nil, errors.WithMessage(errors.ErrInvalidInput, "check-in and check-out dates are required")
-	}
-
-	if params.CheckIn.After(params.CheckOut) {
-		return nil, errors.WithMessage(errors.ErrInvalidInput, "check-in date must be before check-out date")
+	if params.Status == nil {
+		status := model.RoomStatusAvailable
+		params.Status = &status
 	}
 
 	rooms, err := s.repo.GetAvailableRooms(ctx, params)

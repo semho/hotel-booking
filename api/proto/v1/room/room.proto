@@ -2,11 +2,9 @@ syntax = "proto3";
 
 package hotel.room.v1;
 
-option go_package = "github.com/semho/hotel-booking/api/proto/v1/room";
+option go_package = "github.com/semho/hotel-booking/pkg/proto/room_v1/room";
 
 import "google/api/annotations.proto";
-import "google/protobuf/timestamp.proto";
-import "google/protobuf/empty.proto";
 
 // Room service definition
 service RoomService {
@@ -29,9 +27,10 @@ enum RoomType {
 // Room status enumeration
 enum RoomStatus {
   ROOM_STATUS_UNSPECIFIED = 0;
-  ROOM_STATUS_AVAILABLE = 1;
-  ROOM_STATUS_OCCUPIED = 2;
-  ROOM_STATUS_MAINTENANCE = 3;
+  ROOM_STATUS_AVAILABLE = 1; // Готова к заселению
+  ROOM_STATUS_REPAIR = 2; // Ремонт
+  ROOM_STATUS_MAINTENANCE = 3; // Уборка
+  ROOM_STATUS_OUT_OF_SERVICE = 4; // Выведена из эксплуатации
 }
 
 // Room representation
@@ -47,10 +46,9 @@ message Room {
 
 // Request for getting available rooms
 message GetAvailableRoomsRequest {
-  google.protobuf.Timestamp check_in = 1;
-  google.protobuf.Timestamp check_out = 2;
-  optional int32 capacity = 3;
-  optional RoomType type = 4;
+  optional int32 capacity = 1;
+  optional RoomType type = 2;
+  optional RoomStatus status = 3;
 }
 
 // Response with available rooms

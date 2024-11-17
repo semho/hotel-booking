@@ -1,14 +1,16 @@
 LOCAL_BIN:=$(CURDIR)/bin
-SERVICE ?= room-service
+PROTO_DIR:=$(CURDIR)/api/proto/v1
+SERVICE ?= booking-service
+DB_NAME ?= booking_service
 LOCAL_MIGRATION_DIR=$(CURDIR)/$(SERVICE)/deployments/migrations
-LOCAL_MIGRATION_DSN="postgres://postgres:postgres@localhost:5432/room_service?sslmode=disable"
+LOCAL_MIGRATION_DSN="postgres://postgres:postgres@localhost:5432/$(DB_NAME)?sslmode=disable"
 .PHONY: install-deps
 install-deps:
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
 	GOBIN=$(LOCAL_BIN) go install -mod=mod google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.2
 	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.15.2
 	GOBIN=$(LOCAL_BIN) go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.15.2
-	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@latest
+	GOBIN=$(LOCAL_BIN) go install github.com/pressly/goose/v3/cmd/goose@v3.22.1
 	go mod tidy
 
 .PHONY: migrate-up
@@ -63,14 +65,29 @@ vendor-proto:
 		rm -rf vendor.protogen/openapiv2 ;\
 	fi
 
-.PHONY: generate
-generate:
+.PHONY: generate-room
+generate-room:
 	mkdir -p pkg/proto/room_v1
-	protoc --proto_path api/proto/v1/room --proto_path vendor.protogen \
+	protoc --proto_path $(PROTO_DIR) --proto_path vendor.protogen \
 		--go_out=pkg/proto/room_v1 --go_opt=paths=source_relative \
 		--plugin=protoc-gen-go=./bin/protoc-gen-go \
 		--go-grpc_out=pkg/proto/room_v1 --go-grpc_opt=paths=source_relative \
 		--plugin=protoc-gen-go-grpc=./bin/protoc-gen-go-grpc \
 		--grpc-gateway_out=pkg/proto/room_v1 --grpc-gateway_opt=paths=source_relative \
 		--plugin=protoc-gen-grpc-gateway=./bin/protoc-gen-grpc-gateway \
-		api/proto/v1/room/room.proto
+		"$(PROTO_DIR)/room/room.proto"
+
+.PHONY: generate-booking
+generate-booking:
+	mkdir -p pkg/proto/booking_v1
+	protoc --proto_path $(PROTO_DIR) --proto_path vendor.protogen \
+		--go_out=pkg/proto/booking_v1 --go_opt=paths=source_relative \
+		--plugin=protoc-gen-go=./bin/protoc-gen-go \
+		--go-grpc_out=pkg/proto/booking_v1 --go-grpc_opt=paths=source_relative \
+		--plugin=protoc-gen-go-grpc=./bin/protoc-gen-go-grpc \
+		--grpc-gateway_out=pkg/proto/booking_v1 --grpc-gateway_opt=paths=source_relative \
+		--plugin=protoc-gen-grpc-gateway=./bin/protoc-gen-grpc-gateway \
+		"$(PROTO_DIR)/booking/booking.proto"
+
+.PHONY: generate
+generate: generate-room generate-booking

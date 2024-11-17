@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package hotel.booking.v1;
+
+option go_package = "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking";
+
+import "google/api/annotations.proto";
+import "google/protobuf/timestamp.proto";
+import "room/room.proto"; // импортируем определения из room.proto
+
+// Статусы бронирования
+enum BookingStatus {
+  BOOKING_STATUS_UNSPECIFIED = 0;
+  BOOKING_STATUS_PENDING = 1;    // Ожидает подтверждения
+  BOOKING_STATUS_CONFIRMED = 2;  // Подтверждено
+  BOOKING_STATUS_CANCELLED = 3;  // Отменено
+  BOOKING_STATUS_COMPLETED = 4;  // Завершено (после выезда)
+  BOOKING_STATUS_NO_SHOW = 5;    // Гость не заехал
+}
+
+service BookingService {
+  // GetAvailableRooms returns list of available rooms based on search criteria
+  // and current bookings
+  rpc GetAvailableRooms(GetAvailableRoomsRequest) returns (GetAvailableRoomsResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/available-rooms"
+    };
+  }
+}
+
+message GetAvailableRoomsRequest {
+  google.protobuf.Timestamp check_in = 1;
+  google.protobuf.Timestamp check_out = 2;
+  optional int32 capacity = 3;
+  optional hotel.room.v1.RoomType type = 4;
+}
+
+message GetAvailableRoomsResponse {
+  repeated hotel.room.v1.Room rooms = 1;
+}
+
+// Базовая структура бронирования для переиспользования
+message Booking {
+  string id = 1;
+  string room_id = 2;
+  optional string user_id = 3;
+  string guest_name = 4;
+  string guest_email = 5;
+  string guest_phone = 6;
+  google.protobuf.Timestamp check_in = 7;
+  google.protobuf.Timestamp check_out = 8;
+  BookingStatus status = 9;
+  double total_price = 10;
+  google.protobuf.Timestamp created_at = 11;
+  google.protobuf.Timestamp updated_at = 12;
+}

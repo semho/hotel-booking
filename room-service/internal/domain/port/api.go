@@ -2,7 +2,7 @@ package port
 
 import (
 	"context"
-	pb "github.com/semho/hotel-booking/pkg/proto/room_v1"
+	pb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 )
 
 type RoomAPI interface {

@@ -16,10 +16,10 @@ COPY . .
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/bin/room-service ./room-service/cmd/main.go
 
 # Устанавливаем goose
-RUN GOBIN=/app/bin go install github.com/pressly/goose/v3/cmd/goose@latest
+RUN GOBIN=/app/bin go install github.com/pressly/goose/v3/cmd/goose@v3.22.1
 
 FROM alpine:latest
-RUN apk add --no-cache postgresql15-client
+RUN apk add --no-cache postgresql16-client
 
 WORKDIR /app
 

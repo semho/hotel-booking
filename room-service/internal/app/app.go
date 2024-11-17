@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/semho/hotel-booking/pkg/logger"
-	pb "github.com/semho/hotel-booking/pkg/proto/room_v1"
+	pb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"github.com/semho/hotel-booking/room-service/internal/config"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

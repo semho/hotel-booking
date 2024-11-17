@@ -16,9 +16,10 @@ const (
 )
 
 const (
-	RoomStatusAvailable   RoomStatus = "AVAILABLE"
-	RoomStatusOccupied    RoomStatus = "OCCUPIED"
-	RoomStatusMaintenance RoomStatus = "MAINTENANCE"
+	RoomStatusAvailable    RoomStatus = "AVAILABLE"
+	RoomStatusRepair       RoomStatus = "REPAIR"
+	RoomStatusMaintenance  RoomStatus = "MAINTENANCE"
+	RoomStatusOutOfService RoomStatus = "OUT_OF_SERVICE"
 )
 
 type Room struct {
@@ -34,8 +35,7 @@ type Room struct {
 }
 
 type SearchParams struct {
-	CheckIn  time.Time
-	CheckOut time.Time
 	Capacity *int
 	Type     *RoomType
+	Status   *RoomStatus
 }
