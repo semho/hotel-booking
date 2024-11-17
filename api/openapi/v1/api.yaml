@@ -14,6 +14,48 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  responses:
+    BadRequest:
+      description: Bad request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    Conflict:
+      description: Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
 
   schemas:
     Error:
@@ -63,48 +105,48 @@ components:
         - capacity
         - status
 
-    Booking:
+    RegisterRequest:
       type: object
+      required:
+        - email
+        - password
+        - firstName
+        - lastName
       properties:
-        id:
-          type: string
-          format: uuid
-        roomId:
-          type: string
-          format: uuid
-        userId:
-          type: string
-          format: uuid
-        guestName:
-          type: string
-        guestEmail:
+        email:
           type: string
           format: email
-        guestPhone:
+        password:
           type: string
-        checkIn:
+          minLength: 8
+        firstName:
           type: string
-          format: date
-        checkOut:
+        lastName:
           type: string
-          format: date
-        status:
+        phone:
           type: string
-          enum: [PENDING, CONFIRMED, CANCELLED, COMPLETED]
-        totalPrice:
-          type: number
-          format: float
-        createdAt:
-          type: string
-          format: date-time
-      required:
-        - roomId
-        - guestName
-        - guestEmail
-        - checkIn
-        - checkOut
 
-    User:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:
+          type: string
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
+    UserInfo:
       type: object
       properties:
         id:
@@ -119,28 +161,15 @@ components:
           type: string
         phone:
           type: string
+        role:
+          type: string
+          enum: [ USER, ADMIN ]
         createdAt:
           type: string
           format: date-time
-      required:
-        - email
-        - firstName
-        - lastName
-
-    AuthResponse:
-      type: object
-      properties:
-        accessToken:
+        updatedAt:
           type: string
-        refreshToken:
-          type: string
-        expiresIn:
-          type: integer
-          description: Token expiration time in seconds
-      required:
-        - accessToken
-        - refreshToken
-        - expiresIn
+          format: date-time
 
 paths:
   /api/v1/bookings/available-rooms:
@@ -218,23 +247,35 @@ paths:
               example:
                 code: "INTERNAL_ERROR"
                 message: "Internal server error"
-
-  /bookings:
+  /api/v1/bookings:
     post:
+      tags:
+        - bookings
       summary: Create a new booking
-      description: Creates a new booking for a room
       security:
-        - bearerAuth: []
+        - bearerAuth: [ ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - roomId
+                - checkIn
+                - checkOut
+                - guestName
+                - guestEmail
               properties:
                 roomId:
                   type: string
                   format: uuid
+                checkIn:
+                  type: string
+                  format: date
+                checkOut:
+                  type: string
+                  format: date
                 guestName:
                   type: string
                   minLength: 2
@@ -243,154 +284,98 @@ paths:
                   format: email
                 guestPhone:
                   type: string
-                checkIn:
-                  type: string
-                  format: date
-                checkOut:
-                  type: string
-                  format: date
-              required:
-                - roomId
-                - guestName
-                - guestEmail
-                - checkIn
-                - checkOut
       responses:
         '201':
           description: Booking created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Booking'
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  roomId:
+                    type: string
+                    format: uuid
+                  userInfo:
+                    $ref: '#/components/schemas/UserInfo'
+                  status:
+                    type: string
+                    enum: [ PENDING ]
+                  message:
+                    type: string
         '400':
-          description: Invalid request parameters
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Room not found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '409':
-          description: Room already booked
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
         '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /auth/register:
+          $ref: '#/components/responses/InternalError'
+  /api/v1/auth/register:
     post:
-      summary: Register a new user
-      description: Create a new user account
+      tags:
+        - auth
+      summary: Register new user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                  minLength: 8
-                firstName:
-                  type: string
-                  minLength: 2
-                lastName:
-                  type: string
-                  minLength: 2
-                phone:
-                  type: string
-              required:
-                - email
-                - password
-                - firstName
-                - lastName
+              $ref: '#/components/schemas/RegisterRequest'
       responses:
         '201':
-          description: User registered successfully
+          description: User successfully registered
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Invalid request parameters
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         '409':
-          description: User already exists
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/Conflict'
         '500':
-          description: Internal server error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/InternalError'
 
-  /auth/login:
+  /api/v1/auth/login:
     post:
-      summary: User login
-      description: Authenticate user and get access token
+      tags:
+        - auth
+      summary: Login user
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                email:
-                  type: string
-                  format: email
-                password:
-                  type: string
-                  minLength: 8
-              required:
-                - email
-                - password
+              $ref: '#/components/schemas/LoginRequest'
       responses:
         '200':
-          description: Login successful
+          description: User successfully logged in
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
         '400':
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/BadRequest'
         '401':
-          description: Authentication failed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+          $ref: '#/components/responses/Unauthorized'
         '500':
-          description: Internal server error
+          $ref: '#/components/responses/InternalError'
+
+  /api/v1/auth/refresh:
+    post:
+      tags:
+        - auth
+      summary: Refresh access token
+      responses:
+        '200':
+          description: Tokens successfully refreshed
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'

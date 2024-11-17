@@ -1,9 +1,10 @@
 LOCAL_BIN:=$(CURDIR)/bin
 PROTO_DIR:=$(CURDIR)/api/proto/v1
-SERVICE ?= booking-service
-DB_NAME ?= booking_service
+DB_PORT ?= 5431
+SERVICE ?= auth-service
+DB_NAME ?= auth_service
 LOCAL_MIGRATION_DIR=$(CURDIR)/$(SERVICE)/deployments/migrations
-LOCAL_MIGRATION_DSN="postgres://postgres:postgres@localhost:5432/$(DB_NAME)?sslmode=disable"
+LOCAL_MIGRATION_DSN="postgres://postgres:postgres@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=disable"
 .PHONY: install-deps
 install-deps:
 	GOBIN=$(LOCAL_BIN) go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.28.1
@@ -89,5 +90,17 @@ generate-booking:
 		--plugin=protoc-gen-grpc-gateway=./bin/protoc-gen-grpc-gateway \
 		"$(PROTO_DIR)/booking/booking.proto"
 
+.PHONY: generate-auth
+generate-auth:
+	mkdir -p pkg/proto/auth_v1
+	protoc --proto_path $(PROTO_DIR) --proto_path vendor.protogen \
+		--go_out=pkg/proto/auth_v1 --go_opt=paths=source_relative \
+		--plugin=protoc-gen-go=./bin/protoc-gen-go \
+		--go-grpc_out=pkg/proto/auth_v1 --go-grpc_opt=paths=source_relative \
+		--plugin=protoc-gen-go-grpc=./bin/protoc-gen-go-grpc \
+		--grpc-gateway_out=pkg/proto/auth_v1 --grpc-gateway_opt=paths=source_relative \
+		--plugin=protoc-gen-grpc-gateway=./bin/protoc-gen-grpc-gateway \
+		"$(PROTO_DIR)/auth/auth.proto"
+
 .PHONY: generate
-generate: generate-room generate-booking
+generate: generate-room generate-booking generate-auth

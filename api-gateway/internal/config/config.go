@@ -8,6 +8,7 @@ import (
 type Config struct {
 	HTTP           HTTPConfig           `mapstructure:"http"`
 	BookingService BookingServiceConfig `mapstructure:"booking_service"`
+	AuthService    BookingServiceConfig `mapstructure:"auth_service"`
 }
 
 type HTTPConfig struct {
@@ -15,6 +16,10 @@ type HTTPConfig struct {
 }
 
 type BookingServiceConfig struct {
+	Address string `mapstructure:"address"`
+}
+
+type AuthService struct {
 	Address string `mapstructure:"address"`
 }
 
@@ -34,6 +39,7 @@ func Load() (*Config, error) {
 	// Явное сопоставление переменных окружения с полями конфига
 	v.BindEnv("http.port", "HTTP_PORT")
 	v.BindEnv("booking_service.address", "BOOKING_SERVICE_ADDR")
+	v.BindEnv("auth_service.address", "AUTH_SERVICE_ADDR")
 
 	// Загрузка конфигурации
 	if err := v.ReadInConfig(); err != nil {

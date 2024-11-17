@@ -49,6 +49,7 @@ func New(cfg *config.Config) (*App, error) {
 	router.Use(middleware.Timeout(60 * time.Second))
 
 	// Регистрируем обработчики
+	deps.AuthHandler.RegisterRoutes(router)
 	deps.BookingHandler.RegisterRoutes(router)
 
 	// Создаем HTTP сервер

@@ -13,3 +13,11 @@ type Error struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
 }
+
+type CreateBookingResponse struct {
+	ID       string    `json:"id"`
+	RoomID   string    `json:"roomId"`
+	UserInfo *UserInfo `json:"userInfo,omitempty"`
+	Status   string    `json:"status"`
+	Message  string    `json:"message"`
+}

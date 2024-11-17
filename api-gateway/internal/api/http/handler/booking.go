@@ -5,11 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/go-chi/chi/v5"
+	"github.com/google/uuid"
 	"github.com/semho/hotel-booking/api-gateway/internal/api/http/mapper"
+	"github.com/semho/hotel-booking/api-gateway/internal/api/http/middleware"
 	"github.com/semho/hotel-booking/api-gateway/internal/api/http/request"
 	"github.com/semho/hotel-booking/api-gateway/internal/api/http/response"
 	"github.com/semho/hotel-booking/pkg/errors"
 	"github.com/semho/hotel-booking/pkg/logger"
+	authpb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 	bookingpb "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking"
 	roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"net/http"
@@ -17,12 +20,17 @@ import (
 )
 
 type BookingHandler struct {
-	bookingClient bookingpb.BookingServiceClient
+	bookingClient  bookingpb.BookingServiceClient
+	authMiddleware *middleware.AuthMiddleware
 }
 
-func NewBookingHandler(bookingClient bookingpb.BookingServiceClient) *BookingHandler {
+func NewBookingHandler(
+	bookingClient bookingpb.BookingServiceClient,
+	authMiddleware *middleware.AuthMiddleware,
+) *BookingHandler {
 	return &BookingHandler{
-		bookingClient: bookingClient,
+		bookingClient:  bookingClient,
+		authMiddleware: authMiddleware,
 	}
 }
 
@@ -32,7 +40,19 @@ func (h *BookingHandler) RegisterRoutes(r chi.Router) {
 			// Маршруты для бронирования
 			r.Route(
 				"/bookings", func(r chi.Router) {
-					r.Get("/available-rooms", h.GetAvailableRooms)
+					// Публичные маршруты
+					r.Group(
+						func(r chi.Router) {
+							r.Get("/available-rooms", h.GetAvailableRooms)
+						},
+					)
+					// Защищенные маршруты
+					r.Group(
+						func(r chi.Router) {
+							r.Use(h.authMiddleware.ValidateToken)
+							r.Post("/", h.CreateBooking)
+						},
+					)
 				},
 			)
 		},
@@ -183,5 +203,51 @@ func (h *BookingHandler) respondWithError(w http.ResponseWriter, code int, err e
 			Code:    errorCode,
 			Message: err.Error(),
 		},
+	)
+}
+
+// TODO: заглушка до реализации
+func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
+	// Получаем данные пользователя из контекста (установленные в AuthMiddleware)
+	userInfo, ok := r.Context().Value("user").(*authpb.UserInfo)
+	if !ok {
+		http.Error(w, "unauthorized", http.StatusUnauthorized)
+		return
+	}
+
+	// Читаем тело запроса
+	var req request.CreateBookingRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, "invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	// Создаем заглушку ответа
+	response := response.CreateBookingResponse{
+		ID:     uuid.New().String(), // Генерируем фейковый ID
+		RoomID: req.RoomID,
+		UserInfo: &response.UserInfo{
+			ID:        userInfo.Id,
+			Email:     userInfo.Email,
+			FirstName: userInfo.FirstName,
+			LastName:  userInfo.LastName,
+			Role:      userInfo.Role.String(),
+		},
+		Status:  "PENDING",
+		Message: "Booking created successfully (stub response)",
+	}
+
+	// Отправляем ответ
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		logger.Log.Error("failed to encode response", "error", err)
+	}
+
+	logger.Log.Info(
+		"stub booking created",
+		"user_id", userInfo.Id,
+		"room_id", req.RoomID,
+		"booking_id", response.ID,
 	)
 }

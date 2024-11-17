@@ -10,6 +10,7 @@ var (
 	ErrConflict     = errors.New("entity already exists")
 	ErrInvalidInput = errors.New("invalid input")
 	ErrInternal     = errors.New("internal error")
+	ErrUnauthorized = errors.New("unauthorized")
 )
 
 // WithMessage оборачивает ошибку с дополнительным сообщением

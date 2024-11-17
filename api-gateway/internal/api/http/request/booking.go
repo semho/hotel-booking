@@ -57,3 +57,12 @@ func (req *CreateBooking) Validate() error {
 	}
 	return nil
 }
+
+type CreateBookingRequest struct {
+	RoomID     string `json:"roomId"`
+	CheckIn    string `json:"checkIn"`
+	CheckOut   string `json:"checkOut"`
+	GuestName  string `json:"guestName"`
+	GuestEmail string `json:"guestEmail"`
+	GuestPhone string `json:"guestPhone"`
+}

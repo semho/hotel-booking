@@ -3,3 +3,6 @@ http:
 
 booking_service:
   address: "booking-service:9092"
+
+auth_service:
+  address: "auth-service:9092"

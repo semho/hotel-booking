@@ -1,0 +1,46 @@
+services:
+  auth-service:
+    build:
+      context: ../../
+      dockerfile: auth-service/deployments/Dockerfile
+    container_name: auth-service
+    ports:
+      - "9091:9092" # gRPC port
+    depends_on:
+      auth-db:
+        condition: service_healthy
+    networks:
+      - hotel-network
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env:ro
+
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    environment:
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    ports:
+      - "5431:5432"
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - hotel-network
+    restart: unless-stopped
+
+volumes:
+  auth-db-data:
+    name: auth-db-data
+
+networks:
+  hotel-network:
+    name: hotel-network
+    driver: bridge

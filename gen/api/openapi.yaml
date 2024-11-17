@@ -205,7 +205,7 @@ paths:
       x-accepts: application/json
   /auth/login:
     post:
-      description: Authenticate user and get access token
+      description: Authenticate user and get access jwt
       requestBody:
         $ref: '#/components/requestBodies/inline_object_2'
         content:
