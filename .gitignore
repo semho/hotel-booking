@@ -1,6 +1,9 @@
 /bin
 /vendor.protogen
+# IDE
 .idea/
+.vscode/
 
-# room-service
-/room-service/deployments/.env
+# Env files
+.env
+**/.env

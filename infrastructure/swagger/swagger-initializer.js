@@ -1,7 +1,7 @@
 //<editor-fold desc="Changeable Configuration Block">
 window.onload = function() {
     window.ui = SwaggerUIBundle({
-        url: "swagger.yaml",  // Изменили путь
+        url: "swagger.yaml",
         dom_id: "#swagger-ui",
         deepLinking: true,
         displayRequestDuration: true,
@@ -13,7 +13,8 @@ window.onload = function() {
             SwaggerUIBundle.plugins.DownloadUrl
         ],
         layout: "StandaloneLayout",
-        defaultModelsExpandDepth: 1
+        defaultModelsExpandDepth: 1,
+        tryItOutEnabled: true
     });
 };
 //</editor-fold>

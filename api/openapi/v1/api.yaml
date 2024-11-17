@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 servers:
-  - url: http://localhost:8080/api/v1
+  - url: http://localhost:8080
     description: Local development server
 
 components:
@@ -40,6 +40,7 @@ components:
         type:
           type: string
           enum: [STANDARD, DELUXE, SUITE]
+          description: Room type (corresponds to ROOM_TYPE_* in protobuf)
         price:
           type: number
           format: float
@@ -48,7 +49,8 @@ components:
           minimum: 1
         status:
           type: string
-          enum: [AVAILABLE, OCCUPIED, MAINTENANCE]
+          enum: [AVAILABLE, REPAIR, MAINTENANCE, OUT_OF_SERVICE]
+          description: Room status (corresponds to ROOM_STATUS_* in protobuf)
         amenities:
           type: array
           items:
@@ -141,10 +143,13 @@ components:
         - expiresIn
 
 paths:
-  /rooms:
+  /api/v1/bookings/available-rooms:
     get:
-      summary: Get available rooms
-      description: Returns a list of available rooms based on search criteria
+      summary: Get available rooms for booking
+      description: Returns list of available rooms based on search criteria and current bookings
+      operationId: getAvailableRooms
+      tags:
+        - bookings
       parameters:
         - name: checkIn
           in: query
@@ -152,22 +157,32 @@ paths:
           schema:
             type: string
             format: date
+          description: Check-in date in YYYY-MM-DD format
+          example: "2024-11-20"
         - name: checkOut
           in: query
           required: true
           schema:
             type: string
             format: date
+          description: Check-out date in YYYY-MM-DD format
+          example: "2024-11-24"
         - name: capacity
           in: query
+          required: false
           schema:
             type: integer
             minimum: 1
+          description: Minimum room capacity
+          example: 1
         - name: type
           in: query
+          required: false
           schema:
             type: string
             enum: [STANDARD, DELUXE, SUITE]
+          description: Room type filter
+          example: "STANDARD"
       responses:
         '200':
           description: List of available rooms
@@ -177,18 +192,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Room'
+              example:
+                - id: "123e4567-e89b-12d3-a456-426614174000"
+                  roomNumber: "101"
+                  type: "STANDARD"
+                  price: 100.00
+                  capacity: 2
+                  status: "AVAILABLE"
+                  amenities: [ "WiFi", "TV" ]
         '400':
           description: Invalid parameters
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                code: "INVALID_INPUT"
+                message: "Invalid check-in date format"
         '500':
           description: Internal server error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+              example:
+                code: "INTERNAL_ERROR"
+                message: "Internal server error"
 
   /bookings:
     post:

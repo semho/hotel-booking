@@ -1,0 +1,18 @@
+services:
+  api-gateway:
+    build:
+      context: ../../
+      dockerfile: api-gateway/deployments/Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - hotel-network
+    restart: unless-stopped
+    volumes:
+      - ./.env:/app/.env:ro
+
+networks:
+  hotel-network:
+    name: hotel-network
+    driver: bridge
