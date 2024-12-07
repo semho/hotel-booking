@@ -148,6 +148,14 @@ components:
         user:
           $ref: '#/components/schemas/UserInfo'
 
+    ValidateResponse:
+      type: object
+      properties:
+        validate:
+          type: boolean
+        user:
+          $ref: '#/components/schemas/UserInfo'
+
     UserInfo:
       type: object
       properties:
@@ -388,6 +396,33 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/v1/auth/validate:
+    post:
+      tags:
+        - auth
+      summary: Validate access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - accessToken
+              properties:
+                accessToken:
+                  type: string
+      responses:
+        '200':
+          description: Tokens successfully validate
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidateResponse'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '500':

@@ -27,8 +27,47 @@ func (h *AuthHandler) RegisterRoutes(r chi.Router) {
 			r.Post("/register", h.Register)
 			r.Post("/login", h.Login)
 			r.Post("/refresh", h.Refresh)
+			r.Post("/validate", h.Validate)
 		},
 	)
+}
+
+func (h *AuthHandler) Validate(w http.ResponseWriter, r *http.Request) {
+	var req request.ValidateRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	resp, err := h.authClient.Validate(
+		r.Context(), &pb.ValidateRequest{
+			AccessToken: req.AccessToken,
+		},
+	)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		logger.Log.Error("api-gateway validate with authClient", err)
+		return
+	}
+
+	logger.Log.Info(
+		"received response from auth service",
+		"valid", resp.Valid,
+		"user", resp.User,
+	)
+
+	// Отправляем ответ клиенту
+	authResponse := response.ValidateResponse{
+		Valid:    resp.Valid,
+		UserInfo: response.UserFromProto(resp.User),
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	err = json.NewEncoder(w).Encode(authResponse)
+	if err != nil {
+		logger.Log.Error("api-gateway validate ", err)
+		return
+	}
 }
 
 func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {

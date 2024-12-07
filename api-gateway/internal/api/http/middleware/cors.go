@@ -2,30 +2,20 @@ package middleware
 
 import (
 	"github.com/go-chi/cors"
+	"github.com/semho/hotel-booking/api-gateway/internal/config"
 	"net/http"
 )
 
-func CORS() func(http.Handler) http.Handler {
+func CORS(cfg config.CORSConfig) func(http.Handler) http.Handler {
 	return cors.Handler(
 		cors.Options{
-			AllowedOrigins: []string{"http://localhost:8081"}, // Разрешенные Origin
-			AllowedMethods: []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-			AllowedHeaders: []string{
-				"Accept",
-				"Authorization",
-				"Content-Type",
-				"X-CSRF-Token",
-				"X-Requested-With",
-				"Force-Country-Code",
-				"Geo-Ip-2-Country",
-			}, // Разрешенные заголовки
-			ExposedHeaders: []string{
-				"Link",
-				"Set-Cookie",
-			}, // Заголовки, доступные клиенту
-			AllowCredentials: true, // Разрешить передачу cookies
-			MaxAge:           300,  // Кэширование preflight запросов в секундах
-			Debug:            true, // Включить отладку (для разработки)
+			AllowedOrigins:   cfg.Origins, // Разрешенные Origin
+			AllowedMethods:   cfg.Methods,
+			AllowedHeaders:   cfg.Headers,        // Разрешенные заголовки
+			ExposedHeaders:   cfg.ExposedHeaders, // Заголовки, доступные клиенту
+			AllowCredentials: cfg.Credentials,    // Разрешить передачу cookies
+			MaxAge:           cfg.MaxAge,         // Кэширование preflight запросов в секундах
+			Debug:            cfg.Debug,          // Включить отладку (для разработки)
 		},
 	)
 }

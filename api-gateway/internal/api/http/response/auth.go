@@ -35,3 +35,8 @@ func UserFromProto(user *pb.UserInfo) UserInfo {
 		UpdatedAt: user.UpdatedAt.AsTime(),
 	}
 }
+
+type ValidateResponse struct {
+	Valid    bool     `json:"valid"`
+	UserInfo UserInfo `json:"user"`
+}

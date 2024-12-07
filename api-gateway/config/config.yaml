@@ -6,3 +6,28 @@ booking_service:
 
 auth_service:
   address: "auth-service:9092"
+
+cors:
+  origins:
+    - "http://localhost:8081"
+  methods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "PATCH"
+    - "DELETE"
+    - "OPTIONS"
+  headers:
+    - "Accept"
+    - "Authorization"
+    - "Content-Type"
+    - "X-CSRF-Token"
+    - "X-Requested-With"
+    - "Force-Country-Code"
+    - "Geo-Ip-2-Country"
+  exposed_headers:
+    - "Link"
+    - "Set-Cookie"
+  credentials: true
+  max_age: 300
+  debug: true

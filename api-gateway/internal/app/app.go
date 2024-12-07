@@ -29,7 +29,7 @@ func New(cfg *config.Config) (*App, error) {
 	router := chi.NewRouter()
 
 	// Добавляем CORS middleware перед другими middleware
-	router.Use(appMiddleware.CORS())
+	router.Use(appMiddleware.CORS(cfg.CORS))
 
 	// Добавляем middleware
 	router.Use(middleware.RequestID)

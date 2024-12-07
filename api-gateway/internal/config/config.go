@@ -9,6 +9,7 @@ type Config struct {
 	HTTP           HTTPConfig           `mapstructure:"http"`
 	BookingService BookingServiceConfig `mapstructure:"booking_service"`
 	AuthService    BookingServiceConfig `mapstructure:"auth_service"`
+	CORS           CORSConfig           `mapstructure:"cors"`
 }
 
 type HTTPConfig struct {
@@ -21,6 +22,16 @@ type BookingServiceConfig struct {
 
 type AuthService struct {
 	Address string `mapstructure:"address"`
+}
+
+type CORSConfig struct {
+	Origins        []string `mapstructure:"origins"`
+	Methods        []string `mapstructure:"methods"`
+	Headers        []string `mapstructure:"headers"`
+	ExposedHeaders []string `mapstructure:"exposed_headers"`
+	Credentials    bool     `mapstructure:"credentials"`
+	MaxAge         int      `mapstructure:"max_age"`
+	Debug          bool     `mapstructure:"debug"`
 }
 
 func Load() (*Config, error) {

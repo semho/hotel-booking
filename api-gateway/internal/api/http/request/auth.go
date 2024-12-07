@@ -16,3 +16,7 @@ type LoginRequest struct {
 type RefreshRequest struct {
 	RefreshToken string `json:"refreshToken"`
 }
+
+type ValidateRequest struct {
+	AccessToken string `json:"accessToken"`
+}
