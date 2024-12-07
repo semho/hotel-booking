@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+
 	"github.com/semho/hotel-booking/auth-service/internal/api/grpc/mapper"
 	"github.com/semho/hotel-booking/auth-service/internal/domain/model"
 	"github.com/semho/hotel-booking/auth-service/internal/domain/port"
@@ -77,6 +78,49 @@ func (h *AuthHandler) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Auth
 	if err != nil {
 		return nil, status.Errorf(codes.Internal, "failed to login user: %v", err)
 	}
+
+	logger.Log.Info(
+		"auth service response",
+		"user_id", response.User.ID,
+		"access_token_length", len(response.AccessToken),
+		"refresh_token_length", len(response.RefreshToken),
+	)
+
+	logger.Log.Info(
+		"grpc handler: auth response",
+		"access_token", response.AccessToken,
+		"refresh_token", response.RefreshToken,
+	)
+
+	protoResponse := mapper.ToProtoAuthResponse(response)
+
+	logger.Log.Info(
+		"grpc handler: proto response",
+		"access_token", protoResponse.AccessToken,
+		"refresh_token", protoResponse.RefreshToken,
+	)
+
+	return protoResponse, nil
+}
+
+func (h *AuthHandler) Refresh(ctx context.Context, req *pb.RefreshRequest) (*pb.AuthResponse, error) {
+	logger.Log.Info(
+		"auth Refresh",
+		"refresh_token_length", len(req.RefreshToken),
+	)
+
+	// Обновляем токены через сервис
+	response, err := h.authService.RefreshTokens(ctx, req.RefreshToken)
+	if err != nil {
+		return nil, status.Errorf(codes.Unauthenticated, "invalid refresh token: %v", err)
+	}
+
+	logger.Log.Info(
+		"auth service refresh response",
+		"user_id", response.User.ID,
+		"access_token_length", len(response.AccessToken),
+		"refresh_token_length", len(response.RefreshToken),
+	)
 
 	return mapper.ToProtoAuthResponse(response), nil
 }

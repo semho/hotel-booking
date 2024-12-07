@@ -2,10 +2,12 @@ package service
 
 import (
 	"context"
+
 	"github.com/semho/hotel-booking/auth-service/internal/domain/model"
 	"github.com/semho/hotel-booking/auth-service/internal/domain/port"
 	"github.com/semho/hotel-booking/pkg/auth/jwt"
 	"github.com/semho/hotel-booking/pkg/errors"
+	"github.com/semho/hotel-booking/pkg/logger"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -98,6 +100,12 @@ func (s *authService) Login(ctx context.Context, email, password string) (*model
 	if err != nil {
 		return nil, err
 	}
+
+	logger.Log.Info(
+		"auth service: tokens created",
+		"access_token", accessToken,
+		"refresh_token", refreshToken,
+	)
 
 	return &model.AuthResponse{
 		AccessToken:  accessToken,

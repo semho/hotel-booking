@@ -1,9 +1,10 @@
 package jwt
 
 import (
+	"time"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
-	"time"
 )
 
 type TokenManager struct {

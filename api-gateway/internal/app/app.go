@@ -3,13 +3,14 @@ package app
 import (
 	"context"
 	"fmt"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/go-chi/cors"
-	"github.com/semho/hotel-booking/api-gateway/internal/config"
-	"github.com/semho/hotel-booking/pkg/logger"
 	"net/http"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	appMiddleware "github.com/semho/hotel-booking/api-gateway/internal/api/http/middleware"
+	"github.com/semho/hotel-booking/api-gateway/internal/config"
+	"github.com/semho/hotel-booking/pkg/logger"
 )
 
 type App struct {
@@ -28,18 +29,7 @@ func New(cfg *config.Config) (*App, error) {
 	router := chi.NewRouter()
 
 	// Добавляем CORS middleware перед другими middleware
-	router.Use(
-		cors.Handler(
-			cors.Options{
-				AllowedOrigins:   []string{"*"}, // TODO: Для прода заменить на конкретные домены
-				AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"},
-				AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
-				ExposedHeaders:   []string{"Link"},
-				AllowCredentials: true,
-				MaxAge:           300, // Maximum value not ignored by any of major browsers
-			},
-		),
-	)
+	router.Use(appMiddleware.CORS())
 
 	// Добавляем middleware
 	router.Use(middleware.RequestID)

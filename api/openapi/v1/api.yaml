@@ -143,6 +143,8 @@ components:
       properties:
         accessToken:
           type: string
+        refreshToken:
+          type: string
         user:
           $ref: '#/components/schemas/UserInfo'
 
@@ -368,6 +370,17 @@ paths:
       tags:
         - auth
       summary: Refresh access token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - refreshToken
+              properties:
+                refreshToken:
+                  type: string
       responses:
         '200':
           description: Tokens successfully refreshed

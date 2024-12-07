@@ -1,8 +1,11 @@
 LOCAL_BIN:=$(CURDIR)/bin
 PROTO_DIR:=$(CURDIR)/api/proto/v1
+
+#3 константы ниже меняем для каждого сервиса, либо указываем в команде терминала
 DB_PORT ?= 5431
 SERVICE ?= auth-service
 DB_NAME ?= auth_service
+
 LOCAL_MIGRATION_DIR=$(CURDIR)/$(SERVICE)/deployments/migrations
 LOCAL_MIGRATION_DSN="postgres://postgres:postgres@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=disable"
 .PHONY: install-deps
@@ -104,3 +107,27 @@ generate-auth:
 
 .PHONY: generate
 generate: generate-room generate-booking generate-auth
+
+.PHONY: run-services
+run-services:
+	docker-compose -f auth-service/deployments/docker-compose.yml up -d
+	docker-compose -f room-service/deployments/docker-compose.yml up -d
+	docker-compose -f booking-service/deployments/docker-compose.yml up -d
+	docker-compose -f api-gateway/deployments/docker-compose.yml up -d
+	docker-compose -f infrastructure/swagger/docker-compose.yml up -d
+
+.PHONY: run-services-build
+run-services-build:
+	docker-compose -f auth-service/deployments/docker-compose.yml up --build -d
+	docker-compose -f room-service/deployments/docker-compose.yml up --build -d
+	docker-compose -f booking-service/deployments/docker-compose.yml up --build -d
+	docker-compose -f api-gateway/deployments/docker-compose.yml up --build -d
+	docker-compose -f infrastructure/swagger/docker-compose.yml up --build -d
+
+.PHONY: stop-services
+stop-services:
+	docker-compose -f auth-service/deployments/docker-compose.yml down
+	docker-compose -f room-service/deployments/docker-compose.yml down
+	docker-compose -f booking-service/deployments/docker-compose.yml down
+	docker-compose -f api-gateway/deployments/docker-compose.yml down
+	docker-compose -f infrastructure/swagger/docker-compose.yml down

@@ -1,13 +1,15 @@
 package response
 
 import (
-	pb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 	"time"
+
+	pb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 )
 
 type AuthResponse struct {
-	AccessToken string   `json:"accessToken"`
-	User        UserInfo `json:"user"`
+	AccessToken  string   `json:"accessToken"`
+	RefreshToken string   `json:"refreshToken"`
+	User         UserInfo `json:"user"`
 }
 
 type UserInfo struct {
