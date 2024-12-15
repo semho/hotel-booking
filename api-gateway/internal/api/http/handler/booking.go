@@ -4,6 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/semho/hotel-booking/api-gateway/internal/api/http/mapper"
@@ -15,8 +18,6 @@ import (
 	authpb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 	bookingpb "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking"
 	roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
-	"net/http"
-	"time"
 )
 
 type BookingHandler struct {
@@ -162,11 +163,13 @@ func (h *BookingHandler) parseSearchParams(r *http.Request) (*request.SearchPara
 	}
 
 	if roomType := r.URL.Query().Get("type"); roomType != "" {
-		t := mapper.StringToProtoRoomType(roomType)
-		if t == roompb.RoomType_ROOM_TYPE_UNSPECIFIED {
+		// Проверяем, что значение есть в enum
+		if val, ok := roompb.RoomType_value[roomType]; !ok {
 			return nil, errors.WithMessage(errors.ErrInvalidInput, "invalid room type")
+		} else {
+			t := roompb.RoomType(val)
+			params.Type = &t
 		}
-		params.Type = &t
 	}
 
 	// Валидируем параметры
@@ -223,7 +226,7 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Создаем заглушку ответа
-	response := response.CreateBookingResponse{
+	res := response.CreateBookingResponse{
 		ID:     uuid.New().String(), // Генерируем фейковый ID
 		RoomID: req.RoomID,
 		UserInfo: &response.UserInfo{
@@ -240,7 +243,7 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	// Отправляем ответ
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	if err := json.NewEncoder(w).Encode(res); err != nil {
 		logger.Log.Error("failed to encode response", "error", err)
 	}
 
@@ -248,6 +251,6 @@ func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 		"stub booking created",
 		"user_id", userInfo.Id,
 		"room_id", req.RoomID,
-		"booking_id", response.ID,
+		"booking_id", res.ID,
 	)
 }

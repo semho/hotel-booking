@@ -41,7 +41,7 @@ func Load() (*Config, error) {
 
 	// Настройка переменных окружения
 	v.AutomaticEnv()
-	v.SetEnvPrefix("AUTH")
+	//v.SetEnvPrefix("AUTH")
 
 	// Явное сопоставление переменных окружения с полями конфига
 	v.BindEnv("db.host", "DB_HOST")

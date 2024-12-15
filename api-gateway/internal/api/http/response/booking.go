@@ -1,12 +1,14 @@
 package response
 
+import roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
+
 type AvailableRoom struct {
-	ID         string   `json:"id"`
-	RoomNumber string   `json:"roomNumber"`
-	Type       string   `json:"type"`
-	Price      float64  `json:"price"`
-	Capacity   int      `json:"capacity"`
-	Amenities  []string `json:"amenities"`
+	ID         string          `json:"id"`
+	RoomNumber string          `json:"roomNumber"`
+	Type       roompb.RoomType `json:"type"`
+	Price      string          `json:"price"`
+	Capacity   int             `json:"capacity"`
+	Amenities  []string        `json:"amenities"`
 }
 
 type Error struct {

@@ -7,6 +7,9 @@ booking_service:
 auth_service:
   address: "auth-service:9092"
 
+room_service:
+  address: "room-service:9092"
+
 cors:
   origins:
     - "http://localhost:8081"

@@ -14,6 +14,12 @@ service RoomService {
       get: "/api/v1/rooms"
     };
   }
+
+  rpc CreateRoom(CreateRoomRequest) returns (CreateRoomResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/rooms"
+    };
+  }
 }
 
 // Room type enumeration
@@ -38,7 +44,7 @@ message Room {
   string id = 1;
   string room_number = 2;
   RoomType type = 3;
-  double price = 4;
+  string price = 4;
   int32 capacity = 5;
   RoomStatus status = 6;
   repeated string amenities = 7;
@@ -55,3 +61,19 @@ message GetAvailableRoomsRequest {
 message GetAvailableRoomsResponse {
   repeated Room rooms = 1;
 }
+
+// Request for creating a room
+message CreateRoomRequest {
+  string room_number = 1; // Номер комнаты
+  RoomType type = 2;      // Тип комнаты
+  string price = 3;       // Цена комнаты (в формате строки для поддержки DECIMAL)
+  int32 capacity = 4;     // Вместимость
+  RoomStatus status = 5;  // Статус комнаты
+  repeated string amenities = 6; // Удобства
+}
+
+// Response after creating a room
+message CreateRoomResponse {
+  Room room = 1; // Созданная комната
+}
+

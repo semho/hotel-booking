@@ -3,9 +3,11 @@ package service
 import (
 	"context"
 	"fmt"
+
 	"github.com/semho/hotel-booking/booking-service/internal/domain/model"
 	"github.com/semho/hotel-booking/booking-service/internal/domain/port"
 	"github.com/semho/hotel-booking/pkg/errors"
+	pb "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking"
 )
 
 type bookingService struct {
@@ -21,16 +23,16 @@ func NewBookingService(bookingRepo port.BookingRepository) port.BookingService {
 // Валидация статуса
 func (s *bookingService) validateStatus(status model.BookingStatus) error {
 	switch status {
-	case model.BookingStatusPending,
-		model.BookingStatusConfirmed,
-		model.BookingStatusCancelled,
-		model.BookingStatusCompleted,
-		model.BookingStatusNoShow:
+	case pb.BookingStatus_BOOKING_STATUS_PENDING,
+		pb.BookingStatus_BOOKING_STATUS_CONFIRMED,
+		pb.BookingStatus_BOOKING_STATUS_CANCELLED,
+		pb.BookingStatus_BOOKING_STATUS_COMPLETED,
+		pb.BookingStatus_BOOKING_STATUS_NO_SHOW:
 		return nil
 	default:
 		return errors.WithMessage(
 			errors.ErrInvalidInput,
-			fmt.Sprintf("invalid booking status: %s", status),
+			fmt.Sprintf("invalid booking status: %d", status),
 		)
 	}
 }

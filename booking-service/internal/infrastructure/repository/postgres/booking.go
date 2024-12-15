@@ -3,7 +3,6 @@ package postgres
 import (
 	"context"
 	"fmt"
-	"github.com/semho/hotel-booking/pkg/errors"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -11,7 +10,8 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/semho/hotel-booking/booking-service/internal/domain/model"
 	"github.com/semho/hotel-booking/booking-service/internal/domain/port"
-	_ "github.com/semho/hotel-booking/pkg/errors"
+	"github.com/semho/hotel-booking/pkg/errors"
+	pb "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking"
 )
 
 const (
@@ -70,9 +70,9 @@ func (r *bookingRepository) GetBookingsForPeriod(ctx context.Context, checkIn, c
 				squirrel.Lt{checkInColumn: checkOut},
 				squirrel.Gt{checkOutColumn: checkIn},
 				// Исключаем отмененные и завершенные бронирования
-				squirrel.NotEq{statusColumn: model.BookingStatusCancelled},
-				squirrel.NotEq{statusColumn: model.BookingStatusCompleted},
-				squirrel.NotEq{statusColumn: model.BookingStatusNoShow},
+				squirrel.NotEq{statusColumn: pb.BookingStatus_BOOKING_STATUS_CANCELLED},
+				squirrel.NotEq{statusColumn: pb.BookingStatus_BOOKING_STATUS_COMPLETED},
+				squirrel.NotEq{statusColumn: pb.BookingStatus_BOOKING_STATUS_NO_SHOW},
 			},
 		)
 
@@ -103,8 +103,8 @@ func (r *bookingRepository) IsRoomAvailable(ctx context.Context, roomID uuid.UUI
 				squirrel.Gt{checkOutColumn: checkIn},
 				// Проверяем только активные бронирования
 				squirrel.Or{
-					squirrel.Eq{statusColumn: model.BookingStatusPending},
-					squirrel.Eq{statusColumn: model.BookingStatusConfirmed},
+					squirrel.Eq{statusColumn: pb.BookingStatus_BOOKING_STATUS_PENDING},
+					squirrel.Eq{statusColumn: pb.BookingStatus_BOOKING_STATUS_CONFIRMED},
 				},
 			},
 		)

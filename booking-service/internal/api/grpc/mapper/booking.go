@@ -3,12 +3,13 @@ package mapper
 import (
 	"github.com/semho/hotel-booking/booking-service/internal/domain/model"
 	bookingpb "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking"
+	roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 )
 
 func ProtoToSearchParams(req *bookingpb.GetAvailableRoomsRequest) model.SearchParams {
-	var roomType *model.RoomType
+	var roomType *roompb.RoomType
 	if req.Type != nil {
-		rt := protoToRoomType(*req.Type)
+		rt := *req.Type
 		roomType = &rt
 	}
 

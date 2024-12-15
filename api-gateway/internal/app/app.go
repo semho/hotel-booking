@@ -41,6 +41,7 @@ func New(cfg *config.Config) (*App, error) {
 	// Регистрируем обработчики
 	deps.AuthHandler.RegisterRoutes(router)
 	deps.BookingHandler.RegisterRoutes(router)
+	deps.RoomHandler.RegisterRoutes(router)
 
 	// Создаем HTTP сервер
 	httpServer := &http.Server{

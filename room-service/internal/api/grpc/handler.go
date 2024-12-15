@@ -2,10 +2,12 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/semho/hotel-booking/pkg/logger"
 	pb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"github.com/semho/hotel-booking/room-service/internal/api/grpc/mapper"
 	"github.com/semho/hotel-booking/room-service/internal/domain/port"
+	"github.com/shopspring/decimal"
 )
 
 type RoomHandler struct {
@@ -17,6 +19,37 @@ func NewRoomHandler(roomService port.RoomService) *RoomHandler {
 	return &RoomHandler{
 		roomService: roomService,
 	}
+}
+
+func (h *RoomHandler) CreateRoom(ctx context.Context, req *pb.CreateRoomRequest) (*pb.CreateRoomResponse, error) {
+	logger.Log.Info("create room request", "room number", req.RoomNumber)
+	price, err := decimal.NewFromString(req.Price)
+	if err != nil {
+		logger.Log.Error(
+			"failed to create rooms, invalid price format",
+			"error", err,
+		)
+		return nil, fmt.Errorf("invalid price format: %w", err)
+	}
+
+	room := mapper.ProtoToRoom(req, price)
+
+	err = h.roomService.Create(ctx, room)
+	if err != nil {
+		logger.Log.Error(
+			"failed to create room in service",
+			"error", err,
+		)
+		return nil, fmt.Errorf("failed to create room: %w", err)
+	}
+
+	// Маппинг модели комнаты обратно в формат протобаф
+	protoRoom := mapper.ToProtoRoom(*room)
+
+	logger.Log.Info("room successfully created", "room id", protoRoom.Id)
+	return &pb.CreateRoomResponse{
+		Room: protoRoom,
+	}, nil
 }
 
 func (h *RoomHandler) GetAvailableRooms(

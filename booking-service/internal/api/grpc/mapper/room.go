@@ -5,64 +5,6 @@ import (
 	roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 )
 
-// Маппинг типов комнат
-func roomTypeToProto(t model.RoomType) roompb.RoomType {
-	switch t {
-	case model.RoomTypeStandard:
-		return roompb.RoomType_ROOM_TYPE_STANDARD
-	case model.RoomTypeDeluxe:
-		return roompb.RoomType_ROOM_TYPE_DELUXE
-	case model.RoomTypeSuite:
-		return roompb.RoomType_ROOM_TYPE_SUITE
-	default:
-		return roompb.RoomType_ROOM_TYPE_UNSPECIFIED
-	}
-}
-
-func protoToRoomType(t roompb.RoomType) model.RoomType {
-	switch t {
-	case roompb.RoomType_ROOM_TYPE_STANDARD:
-		return model.RoomTypeStandard
-	case roompb.RoomType_ROOM_TYPE_DELUXE:
-		return model.RoomTypeDeluxe
-	case roompb.RoomType_ROOM_TYPE_SUITE:
-		return model.RoomTypeSuite
-	default:
-		return model.RoomTypeStandard // или обработать ошибку
-	}
-}
-
-// Маппинг статусов
-func roomStatusToProto(s model.RoomStatus) roompb.RoomStatus {
-	switch s {
-	case model.RoomStatusAvailable:
-		return roompb.RoomStatus_ROOM_STATUS_AVAILABLE
-	case model.RoomStatusRepair:
-		return roompb.RoomStatus_ROOM_STATUS_REPAIR
-	case model.RoomStatusMaintenance:
-		return roompb.RoomStatus_ROOM_STATUS_MAINTENANCE
-	case model.RoomStatusOutOfService:
-		return roompb.RoomStatus_ROOM_STATUS_OUT_OF_SERVICE
-	default:
-		return roompb.RoomStatus_ROOM_STATUS_UNSPECIFIED
-	}
-}
-
-func protoToRoomStatus(s roompb.RoomStatus) model.RoomStatus {
-	switch s {
-	case roompb.RoomStatus_ROOM_STATUS_AVAILABLE:
-		return model.RoomStatusAvailable
-	case roompb.RoomStatus_ROOM_STATUS_REPAIR:
-		return model.RoomStatusRepair
-	case roompb.RoomStatus_ROOM_STATUS_MAINTENANCE:
-		return model.RoomStatusMaintenance
-	case roompb.RoomStatus_ROOM_STATUS_OUT_OF_SERVICE:
-		return model.RoomStatusOutOfService
-	default:
-		return model.RoomStatusAvailable // или обработать ошибку
-	}
-}
-
 func SearchParamsToProto(params model.SearchParams) *roompb.GetAvailableRoomsRequest {
 	var (
 		roomType *roompb.RoomType
@@ -70,11 +12,11 @@ func SearchParamsToProto(params model.SearchParams) *roompb.GetAvailableRoomsReq
 	)
 
 	if params.Type != nil {
-		rt := roomTypeToProto(*params.Type)
+		rt := *params.Type
 		roomType = &rt
 	}
 
-	// По умолчанию ищем только доступные комнаты
+	// По умолчанию ищем только доступные комнаты, т.к. запрос именно на свободные комнаты и фильтр по статусу лишний
 	availableStatus := roompb.RoomStatus_ROOM_STATUS_AVAILABLE
 	status = &availableStatus
 
@@ -91,10 +33,10 @@ func ProtoToRooms(protoRooms []*roompb.Room) []model.Room {
 		rooms[i] = model.Room{
 			ID:       pr.Id,
 			Number:   pr.RoomNumber,
-			Type:     protoToRoomType(pr.Type),
+			Type:     pr.Type,
 			Price:    pr.Price,
 			Capacity: int(pr.Capacity),
-			Status:   protoToRoomStatus(pr.Status),
+			Status:   pr.Status,
 		}
 	}
 	return rooms
@@ -106,10 +48,10 @@ func RoomsToProto(rooms []model.Room) []*roompb.Room {
 		protoRooms[i] = &roompb.Room{
 			Id:         r.ID,
 			RoomNumber: r.Number,
-			Type:       roomTypeToProto(r.Type),
+			Type:       r.Type,
 			Price:      r.Price,
 			Capacity:   int32(r.Capacity),
-			Status:     roomStatusToProto(r.Status),
+			Status:     r.Status,
 		}
 	}
 	return protoRooms

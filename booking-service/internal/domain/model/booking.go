@@ -1,19 +1,14 @@
 package model
 
 import (
-	"github.com/google/uuid"
 	"time"
+
+	"github.com/google/uuid"
+	pb "github.com/semho/hotel-booking/pkg/proto/booking_v1/booking"
 )
 
-type BookingStatus string
-
-const (
-	BookingStatusPending   BookingStatus = "PENDING"
-	BookingStatusConfirmed BookingStatus = "CONFIRMED"
-	BookingStatusCancelled BookingStatus = "CANCELLED"
-	BookingStatusCompleted BookingStatus = "COMPLETED"
-	BookingStatusNoShow    BookingStatus = "NO_SHOW"
-)
+// Используем тип из proto напрямую
+type BookingStatus = pb.BookingStatus
 
 type Booking struct {
 	ID         uuid.UUID     `db:"id" json:"id"`

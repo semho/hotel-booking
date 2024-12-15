@@ -2,29 +2,19 @@ package model
 
 import (
 	"time"
+
+	pb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 )
 
-type RoomType string
-type RoomStatus string
-
-const (
-	RoomTypeStandard RoomType = "STANDARD"
-	RoomTypeDeluxe   RoomType = "DELUXE"
-	RoomTypeSuite    RoomType = "SUITE"
-)
-
-const (
-	RoomStatusAvailable    RoomStatus = "AVAILABLE"
-	RoomStatusRepair       RoomStatus = "REPAIR"
-	RoomStatusMaintenance  RoomStatus = "MAINTENANCE"
-	RoomStatusOutOfService RoomStatus = "OUT_OF_SERVICE"
-)
+// Используем типы из proto напрямую
+type RoomType = pb.RoomType
+type RoomStatus = pb.RoomStatus
 
 type Room struct {
 	ID       string
 	Number   string
 	Type     RoomType
-	Price    float64
+	Price    string
 	Capacity int
 	Status   RoomStatus
 }

@@ -71,35 +71,67 @@ components:
         - code
         - message
 
+    CreateRoomRequest:
+      type: object
+      properties:
+        room_number:
+          type: string
+          description: Room number
+        type:
+          type: string
+          enum: [ROOM_TYPE_STANDARD, ROOM_TYPE_DELUXE, ROOM_TYPE_SUITE]
+          description: Room type in protobuf
+        price:
+          type: string
+          description: Room price as string
+        capacity:
+          type: integer
+          minimum: 1
+          description: Room capacity
+        status:
+          type: string
+          enum: [ROOM_STATUS_AVAILABLE, ROOM_STATUS_REPAIR, ROOM_STATUS_MAINTENANCE, ROOM_STATUS_OUT_OF_SERVICE]
+          description: Room status in protobuf
+        amenities:
+          type: array
+          items:
+            type: string
+          description: List of room amenities
+      required:
+        - room_number
+        - type
+        - price
+        - capacity
+        - status
+
     Room:
       type: object
       properties:
         id:
           type: string
           format: uuid
-        roomNumber:
+        number:
           type: string
         type:
           type: string
-          enum: [STANDARD, DELUXE, SUITE]
-          description: Room type (corresponds to ROOM_TYPE_* in protobuf)
+          enum: [ROOM_TYPE_STANDARD, ROOM_TYPE_DELUXE, ROOM_TYPE_SUITE]
+          description: Room type in protobuf
         price:
-          type: number
-          format: float
+          type: string
         capacity:
           type: integer
           minimum: 1
         status:
           type: string
-          enum: [AVAILABLE, REPAIR, MAINTENANCE, OUT_OF_SERVICE]
-          description: Room status (corresponds to ROOM_STATUS_* in protobuf)
+          enum: [ROOM_STATUS_AVAILABLE, ROOM_STATUS_REPAIR, ROOM_STATUS_MAINTENANCE, ROOM_STATUS_OUT_OF_SERVICE]
+          description: Room status in protobuf
         amenities:
           type: array
           items:
             type: string
       required:
         - id
-        - roomNumber
+        - number
         - type
         - price
         - capacity
@@ -182,6 +214,35 @@ components:
           format: date-time
 
 paths:
+  /api/v1/rooms:
+    post:
+      tags:
+        - rooms
+      security:
+        - bearerAuth: [ ]
+      summary: Create room
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateRoomRequest'
+      responses:
+        '201':
+          description: Room created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Room'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '500':
+          $ref: '#/components/responses/InternalError'
+
   /api/v1/bookings/available-rooms:
     get:
       summary: Get available rooms for booking
@@ -219,9 +280,9 @@ paths:
           required: false
           schema:
             type: string
-            enum: [STANDARD, DELUXE, SUITE]
+            enum: [ROOM_TYPE_STANDARD, ROOM_TYPE_DELUXE, ROOM_TYPE_SUITE]
           description: Room type filter
-          example: "STANDARD"
+          example: "ROOM_TYPE_STANDARD"
       responses:
         '200':
           description: List of available rooms
@@ -233,11 +294,11 @@ paths:
                   $ref: '#/components/schemas/Room'
               example:
                 - id: "123e4567-e89b-12d3-a456-426614174000"
-                  roomNumber: "101"
-                  type: "STANDARD"
-                  price: 100.00
+                  number: "101"
+                  type: "ROOM_TYPE_STANDARD"
+                  price: "100.00"
                   capacity: 2
-                  status: "AVAILABLE"
+                  status: "ROOM_STATUS_AVAILABLE"
                   amenities: [ "WiFi", "TV" ]
         '400':
           description: Invalid parameters

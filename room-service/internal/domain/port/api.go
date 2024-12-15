@@ -8,9 +8,8 @@ import (
 type RoomAPI interface {
 	// получаем список доступных комнат
 	GetAvailableRooms(ctx context.Context, req *pb.GetAvailableRoomsRequest) (*pb.GetAvailableRoomsResponse, error)
+	CreateRoom(ctx context.Context, req *pb.CreateRoomRequest) (*pb.Room, error)
 
-	// другие методы:
-	// CreateRoom(ctx context.Context, req *pb.CreateRoomRequest) (*pb.Room, error)
 	// UpdateRoom(ctx context.Context, req *pb.UpdateRoomRequest) (*pb.Room, error)
 	// DeleteRoom(ctx context.Context, req *pb.DeleteRoomRequest) (*pb.Empty, error)
 }

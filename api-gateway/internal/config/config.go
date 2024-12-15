@@ -2,13 +2,15 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	HTTP           HTTPConfig           `mapstructure:"http"`
 	BookingService BookingServiceConfig `mapstructure:"booking_service"`
-	AuthService    BookingServiceConfig `mapstructure:"auth_service"`
+	AuthService    AuthServiceConfig    `mapstructure:"auth_service"`
+	RoomService    RoomServiceConfig    `mapstructure:"room_service"`
 	CORS           CORSConfig           `mapstructure:"cors"`
 }
 
@@ -20,7 +22,11 @@ type BookingServiceConfig struct {
 	Address string `mapstructure:"address"`
 }
 
-type AuthService struct {
+type RoomServiceConfig struct {
+	Address string `mapstructure:"address"`
+}
+
+type AuthServiceConfig struct {
 	Address string `mapstructure:"address"`
 }
 
@@ -45,12 +51,14 @@ func Load() (*Config, error) {
 
 	// Настройка переменных окружения
 	v.AutomaticEnv()
-	v.SetEnvPrefix("APP")
+	// Убираем префикс APP
+	// v.SetEnvPrefix("APP")
 
 	// Явное сопоставление переменных окружения с полями конфига
 	v.BindEnv("http.port", "HTTP_PORT")
 	v.BindEnv("booking_service.address", "BOOKING_SERVICE_ADDR")
 	v.BindEnv("auth_service.address", "AUTH_SERVICE_ADDR")
+	v.BindEnv("room_service.address", "ROOM_SERVICE_ADDR")
 
 	// Загрузка конфигурации
 	if err := v.ReadInConfig(); err != nil {

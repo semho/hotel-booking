@@ -1,13 +1,5 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TYPE booking_status AS ENUM (
-    'PENDING',
-    'CONFIRMED',
-    'CANCELLED',
-    'COMPLETED',
-    'NO_SHOW'
-);
-
 CREATE TABLE IF NOT EXISTS bookings (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     room_id UUID NOT NULL,
@@ -17,7 +9,7 @@ CREATE TABLE IF NOT EXISTS bookings (
     guest_phone VARCHAR(50),
     check_in TIMESTAMP WITH TIME ZONE NOT NULL,
     check_out TIMESTAMP WITH TIME ZONE NOT NULL,
-    status booking_status NOT NULL DEFAULT 'PENDING',
+    status INTEGER NOT NULL DEFAULT 0,
     total_price DECIMAL(10,2) NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
@@ -35,5 +27,4 @@ CREATE INDEX idx_bookings_status ON bookings (status);
 -- +goose Down
 -- +goose StatementBegin
 DROP TABLE IF EXISTS bookings;
-DROP TYPE IF EXISTS booking_status;
 -- +goose StatementEnd
