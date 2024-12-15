@@ -127,13 +127,6 @@
 - `POST /api/v1/auth/login` - Вход в систему
 - `POST /api/v1/auth/refresh` - Обновление токенов
 
-### Отели
-- `GET /api/v1/hotels` - Список отелей
-- `GET /api/v1/hotels/{id}` - Информация об отеле
-- `POST /api/v1/hotels` - Создание отеля (Admin)
-- `PUT /api/v1/hotels/{id}` - Обновление отеля (Admin)
-- `DELETE /api/v1/hotels/{id}` - Удаление отеля (Admin)
-
 ### Бронирования
 - `POST /api/v1/bookings` - Создание бронирования
 - `GET /api/v1/bookings` - Список бронирований пользователя
