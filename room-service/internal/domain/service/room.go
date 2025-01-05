@@ -30,6 +30,12 @@ func (s *RoomService) GetAvailableRooms(ctx context.Context, params model.Search
 		"status", params.Status,
 	)
 
+	// Если статус не указан, устанавливаем AVAILABLE по умолчанию
+	if params.Status == nil {
+		availableStatus := pb.RoomStatus_ROOM_STATUS_AVAILABLE
+		params.Status = &availableStatus
+	}
+
 	rooms, err := s.repo.GetAvailableRooms(ctx, params)
 	if err != nil {
 		logger.Log.Error(
