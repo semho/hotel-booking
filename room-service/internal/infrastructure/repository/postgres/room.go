@@ -53,13 +53,11 @@ func (r *roomRepository) GetAvailableRooms(ctx context.Context, params model.Sea
 	).
 		From(tableRooms)
 
-	// Базовый фильтр - только доступные комнаты
+	// Фильтры
 	if params.Status != nil {
 		query = query.Where(squirrel.Eq{statusColumn: *params.Status})
 		logger.Log.Info("applying status filter", statusColumn, *params.Status)
 	}
-
-	// Применяем фильтры
 	if params.Type != nil {
 		query = query.Where(squirrel.Eq{typeColumn: *params.Type})
 		logger.Log.Info("applying type filter", typeColumn, *params.Type)
