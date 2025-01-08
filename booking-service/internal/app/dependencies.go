@@ -6,9 +6,11 @@ import (
 	_ "github.com/lib/pq"
 	grpcHandler "github.com/semho/hotel-booking/booking-service/internal/api/grpc"
 	"github.com/semho/hotel-booking/booking-service/internal/config"
+	"github.com/semho/hotel-booking/booking-service/internal/domain/port"
 	"github.com/semho/hotel-booking/booking-service/internal/domain/service"
 	"github.com/semho/hotel-booking/booking-service/internal/infrastructure/client/room"
 	"github.com/semho/hotel-booking/booking-service/internal/infrastructure/repository/postgres"
+	"github.com/semho/hotel-booking/booking-service/internal/infrastructure/unitofwork"
 	roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -18,6 +20,7 @@ type Deps struct {
 	DB             *sqlx.DB
 	BookingHandler *grpcHandler.BookingHandler
 	RoomClient     roompb.RoomServiceClient
+	BookingUoW     port.BookingUnitOfWork
 }
 
 func initDeps(cfg *config.Config) (*Deps, error) {
@@ -39,14 +42,17 @@ func initDeps(cfg *config.Config) (*Deps, error) {
 
 	// Инициализируем слои
 	bookingRepo := postgres.NewBookingRepository(db)
-	bookingService := service.NewBookingService(bookingRepo)
 	roomClientWrapper := room.NewRoomClient(roomClient)
+	bookingUoW := unitofwork.NewBookingUnitOfWork(db)
+
+	bookingService := service.NewBookingService(bookingRepo, bookingUoW, roomClientWrapper)
 	bookingHandler := grpcHandler.NewBookingHandler(bookingService, roomClientWrapper)
 
 	return &Deps{
 		DB:             db,
 		BookingHandler: bookingHandler,
 		RoomClient:     roomClient,
+		BookingUoW:     bookingUoW,
 	}, nil
 }
 

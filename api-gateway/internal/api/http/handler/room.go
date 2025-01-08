@@ -92,7 +92,7 @@ func (h *RoomHandler) respondWithError(w http.ResponseWriter, code int, err erro
 
 func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 	//TODO: сделать проверку на админа. Лучше не тут, а сделать дополнительный middleware isAdmin
-	//userInfo, ok := r.Context().Value("user").(*authpb.UserInfo)
+	//userInfo, ok := r.Context().Value(app.USER).(*authpb.UserInfo)
 	//if !ok {
 	//	http.Error(w, "unauthorized", http.StatusUnauthorized)
 	//	return

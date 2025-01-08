@@ -20,6 +20,24 @@ service RoomService {
       post: "/api/v1/rooms"
     };
   }
+
+  rpc GetRoomsCount(GetAvailableRoomsRequest) returns (GetRoomsCountResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rooms/count"
+    };
+  }
+
+  rpc GetRoom(GetRoomRequest) returns (GetRoomResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rooms/{id}"
+    };
+  }
+
+  rpc GetFirstAvailableRoom(GetAvailableRoomsRequest) returns (GetRoomResponse) {
+    option (google.api.http) = {
+      get: "/api/v1/rooms/first-available"
+    };
+  }
 }
 
 // Room type enumeration
@@ -77,3 +95,16 @@ message CreateRoomResponse {
   Room room = 1; // Созданная комната
 }
 
+message GetRoomsCountResponse {
+  int32 count = 1;
+}
+
+// Request for getting room by ID
+message GetRoomRequest {
+  string id = 1;  // Room ID
+}
+
+// Response with room information
+message GetRoomResponse {
+  Room room = 1;  // Room data
+}

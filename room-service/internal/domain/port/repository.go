@@ -12,4 +12,6 @@ type RoomRepository interface {
 	Create(ctx context.Context, room *model.Room) error
 	Update(ctx context.Context, room *model.Room) error
 	Delete(ctx context.Context, id uuid.UUID) error
+	GetRoomsCount(ctx context.Context, params model.SearchParams) (int32, error)
+	GetFirstAvailableRoom(ctx context.Context, params model.SearchParams) (*model.Room, error)
 }

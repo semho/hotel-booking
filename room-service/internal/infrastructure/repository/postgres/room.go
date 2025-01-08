@@ -9,6 +9,7 @@ import (
 	"github.com/lib/pq"
 	"github.com/semho/hotel-booking/pkg/errors"
 	"github.com/semho/hotel-booking/pkg/logger"
+	roompb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"github.com/semho/hotel-booking/room-service/internal/domain/model"
 	"github.com/semho/hotel-booking/room-service/internal/domain/port"
 )
@@ -63,8 +64,10 @@ func (r *roomRepository) GetAvailableRooms(ctx context.Context, params model.Sea
 		logger.Log.Info("applying type filter", typeColumn, *params.Type)
 	}
 	if params.Capacity != nil {
-		query = query.Where(squirrel.GtOrEq{capacityColumn: *params.Capacity})
+		query = query.Where(squirrel.Eq{capacityColumn: *params.Capacity})
 		logger.Log.Info("applying capacity filter", capacityColumn, *params.Capacity)
+		//возможно для бизнеса нужно это условие, т.к. в нем будут выбраны комнаты с большей вместимостью, если с выбранной уже нет
+		//query = query.Where(squirrel.GtOrEq{capacityColumn: params.Capacity})
 	}
 
 	sql, args, err := query.ToSql()
@@ -218,4 +221,62 @@ func (r *roomRepository) Delete(ctx context.Context, id uuid.UUID) error {
 		return errors.ErrNotFound
 	}
 	return nil
+}
+
+func (r *roomRepository) GetRoomsCount(ctx context.Context, params model.SearchParams) (int32, error) {
+	query := r.builder.Select("COUNT(*)").
+		From(tableRooms).
+		Where(squirrel.Eq{statusColumn: roompb.RoomStatus_ROOM_STATUS_AVAILABLE})
+
+	if params.Capacity != nil {
+		query = query.Where(squirrel.GtOrEq{capacityColumn: *params.Capacity})
+	}
+	if params.Type != nil {
+		query = query.Where(squirrel.Eq{typeColumn: *params.Type})
+	}
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return 0, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	var count int32
+	if err := r.db.GetContext(ctx, &count, sql, args...); err != nil {
+		return 0, fmt.Errorf("failed to get rooms count: %w", err)
+	}
+
+	return count, nil
+}
+
+// TODO: бессмысленный метод, т.к. сервис ничего не знает о брони, может вернуть любой номер, даже забронированный
+func (r *roomRepository) GetFirstAvailableRoom(ctx context.Context, params model.SearchParams) (*model.Room, error) {
+	query := r.builder.
+		Select("*").
+		From(tableRooms).
+		Where(squirrel.Eq{statusColumn: roompb.RoomStatus_ROOM_STATUS_AVAILABLE})
+
+	if params.Type != nil {
+		query = query.Where(squirrel.Eq{typeColumn: params.Type})
+	}
+	if params.Capacity != nil {
+		query = query.Where(squirrel.Eq{capacityColumn: *params.Capacity})
+		//возможно для бизнеса нужно это условие, т.к. в нем будут выбраны комнаты с большей вместимостью, если с выбранной уже нет
+		//query = query.Where(squirrel.GtOrEq{capacityColumn: params.Capacity})
+	}
+
+	query = query.
+		OrderBy("RANDOM()").
+		Limit(1)
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	var room model.Room
+	if err := r.db.GetContext(ctx, &room, sql, args...); err != nil {
+		return nil, fmt.Errorf("failed to get room: %w", err)
+	}
+
+	return &room, nil
 }

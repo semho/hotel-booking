@@ -116,3 +116,11 @@ func (s *RoomService) Delete(ctx context.Context, id uuid.UUID) error {
 
 	return s.repo.Delete(ctx, id)
 }
+
+func (s *RoomService) GetRoomsCount(ctx context.Context, params model.SearchParams) (int32, error) {
+	return s.repo.GetRoomsCount(ctx, params)
+}
+
+func (s *RoomService) GetFirstAvailableRoom(ctx context.Context, params model.SearchParams) (*model.Room, error) {
+	return s.repo.GetFirstAvailableRoom(ctx, params)
+}

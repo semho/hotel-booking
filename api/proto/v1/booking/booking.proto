@@ -19,11 +19,22 @@ enum BookingStatus {
 }
 
 service BookingService {
-  // GetAvailableRooms returns list of available rooms based on search criteria
-  // and current bookings
   rpc GetAvailableRooms(GetAvailableRoomsRequest) returns (GetAvailableRoomsResponse) {
     option (google.api.http) = {
       get: "/api/v1/available-rooms"
+    };
+  }
+
+  rpc CreateBooking(CreateBookingRequest) returns (CreateBookingResponse) {
+    option (google.api.http) = {
+      post: "/api/v1/bookings"
+    };
+  }
+
+  // UpdateBookingStatus updates booking status
+  rpc UpdateBookingStatus(UpdateBookingStatusRequest) returns (UpdateBookingStatusResponse) {
+    option (google.api.http) = {
+      put: "/api/v1/bookings/{booking_id}/status"
     };
   }
 }
@@ -39,7 +50,33 @@ message GetAvailableRoomsResponse {
   repeated hotel.room.v1.Room rooms = 1;
 }
 
-// Базовая структура бронирования для переиспользования
+message CreateBookingRequest {
+  google.protobuf.Timestamp check_in = 1;
+  google.protobuf.Timestamp check_out = 2;
+  optional int32 capacity = 3;
+  optional hotel.room.v1.RoomType type = 4;
+  optional string user_id = 5;
+  string guest_name = 6;
+  string guest_email = 7;
+  string guest_phone = 8;
+}
+
+message CreateBookingResponse {
+  Booking booking = 1;
+}
+
+message UpdateBookingStatusRequest {
+  string booking_id = 1;
+  BookingStatus status = 2;
+  string reason = 3;
+  string changed_by = 4;
+}
+
+message UpdateBookingStatusResponse {
+  Booking booking = 1;
+}
+
+// структура Booking
 message Booking {
   string id = 1;
   string room_id = 2;
@@ -49,8 +86,7 @@ message Booking {
   string guest_phone = 6;
   google.protobuf.Timestamp check_in = 7;
   google.protobuf.Timestamp check_out = 8;
-  BookingStatus status = 9;
-  double total_price = 10;
-  google.protobuf.Timestamp created_at = 11;
-  google.protobuf.Timestamp updated_at = 12;
+  double total_price = 9;
+  google.protobuf.Timestamp created_at = 10;
+  BookingStatus current_status = 11;
 }

@@ -25,22 +25,36 @@ func (h *BookingHandler) GetAvailableRooms(
 	req *bookingpb.GetAvailableRoomsRequest,
 ) (*bookingpb.GetAvailableRoomsResponse, error) {
 	// Конвертируем параметры запроса в доменную модель
-	params := mapper.ProtoToSearchParams(req)
-
+	paramsForRoom := mapper.ProtoToSearchParams(req)
 	// Получаем комнаты через клиент room service
-	rooms, err := h.roomClient.GetAvailableRooms(ctx, params)
+	rooms, err := h.roomClient.GetAvailableRooms(ctx, paramsForRoom)
 	if err != nil {
 		return nil, err
 	}
-
 	// Проверяем доступность через сервис бронирований
+	params := mapper.ProtoToSearchParamsInternal(req)
 	availableRooms, err := h.bookingService.GetAvailableRooms(ctx, params, rooms)
 	if err != nil {
 		return nil, err
 	}
-
 	// Конвертируем обратно в proto
 	return &bookingpb.GetAvailableRoomsResponse{
 		Rooms: mapper.RoomsToProto(availableRooms),
+	}, nil
+}
+
+func (h *BookingHandler) CreateBooking(
+	ctx context.Context,
+	req *bookingpb.CreateBookingRequest,
+) (*bookingpb.CreateBookingResponse, error) {
+	booking := mapper.ProtoToBooking(req)
+
+	err := h.bookingService.CreateBooking(ctx, booking, req.GetType(), req.GetCapacity())
+	if err != nil {
+		return nil, err
+	}
+
+	return &bookingpb.CreateBookingResponse{
+		Booking: mapper.BookingToProto(booking),
 	}, nil
 }

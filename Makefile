@@ -2,9 +2,9 @@ LOCAL_BIN:=$(CURDIR)/bin
 PROTO_DIR:=$(CURDIR)/api/proto/v1
 
 #3 константы ниже меняем для каждого сервиса, либо указываем в команде терминала
-DB_PORT ?= 5431
-SERVICE ?= auth-service
-DB_NAME ?= auth_service
+DB_PORT ?= 5432
+SERVICE ?= booking-service
+DB_NAME ?= booking_service
 
 LOCAL_MIGRATION_DIR=$(CURDIR)/$(SERVICE)/deployments/migrations
 LOCAL_MIGRATION_DSN="postgres://postgres:postgres@localhost:$(DB_PORT)/$(DB_NAME)?sslmode=disable"

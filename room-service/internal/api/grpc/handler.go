@@ -3,6 +3,7 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/semho/hotel-booking/pkg/logger"
 	pb "github.com/semho/hotel-booking/pkg/proto/room_v1/room"
 	"github.com/semho/hotel-booking/room-service/internal/api/grpc/mapper"
@@ -56,18 +57,8 @@ func (h *RoomHandler) GetAvailableRooms(
 	ctx context.Context,
 	req *pb.GetAvailableRoomsRequest,
 ) (*pb.GetAvailableRoomsResponse, error) {
-	logger.Log.Info(
-		"received GetAvailableRooms request",
-		"capacity", req.Capacity,
-		"type", req.Type,
-		"status", req.Status,
-	)
 
 	params := mapper.ToSearchParams(req)
-	logger.Log.Info(
-		"mapped request to search params",
-		"params", params,
-	)
 
 	rooms, err := h.roomService.GetAvailableRooms(ctx, params)
 	if err != nil {
@@ -78,11 +69,6 @@ func (h *RoomHandler) GetAvailableRooms(
 		return nil, mapper.ToDomainError(err)
 	}
 
-	logger.Log.Info(
-		"found rooms",
-		"count", len(rooms),
-	)
-
 	response := &pb.GetAvailableRoomsResponse{
 		Rooms: make([]*pb.Room, len(rooms)),
 	}
@@ -92,4 +78,50 @@ func (h *RoomHandler) GetAvailableRooms(
 	}
 
 	return response, nil
+}
+
+func (h *RoomHandler) GetRoomsCount(
+	ctx context.Context,
+	req *pb.GetAvailableRoomsRequest,
+) (*pb.GetRoomsCountResponse, error) {
+	params := mapper.ToSearchParams(req)
+
+	count, err := h.roomService.GetRoomsCount(ctx, params)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetRoomsCountResponse{
+		Count: count,
+	}, nil
+}
+
+func (h *RoomHandler) GetRoom(ctx context.Context, req *pb.GetRoomRequest) (*pb.GetRoomResponse, error) {
+	roomID, err := uuid.Parse(req.GetId())
+	if err != nil {
+		return nil, fmt.Errorf("invalid room_id: %w", err)
+	}
+
+	room, err := h.roomService.GetByID(ctx, roomID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetRoomResponse{
+		Room: mapper.ToProtoRoom(*room),
+	}, nil
+}
+
+func (h *RoomHandler) GetFirstAvailableRoom(ctx context.Context, req *pb.GetAvailableRoomsRequest) (
+	*pb.GetRoomResponse,
+	error,
+) {
+	room, err := h.roomService.GetFirstAvailableRoom(ctx, mapper.ToSearchParams(req))
+	if err != nil {
+		return nil, err
+	}
+
+	return &pb.GetRoomResponse{
+		Room: mapper.ToProtoRoom(*room),
+	}, nil
 }
