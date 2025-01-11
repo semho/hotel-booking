@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/semho/hotel-booking/room-service/internal/config"
+	"github.com/semho/hotel-booking/booking-service/internal/config"
 	"os"
 )
 

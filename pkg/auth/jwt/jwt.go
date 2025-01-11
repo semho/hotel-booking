@@ -35,8 +35,9 @@ type Claims struct {
 	UserRole  string    `json:"role"`
 }
 
-func (m *TokenManager) CreateAccessToken(userID uuid.UUID, email, role string) (string, error) {
+func (m *TokenManager) CreateAccessToken(userID uuid.UUID, email, role string) (string, time.Time, error) {
 	now := time.Now()
+	expiresAt := time.Now().Add(m.accessTokenTTL)
 	claims := Claims{
 		RegisteredClaims: jwt.RegisteredClaims{
 			ExpiresAt: jwt.NewNumericDate(now.Add(m.accessTokenTTL)),
@@ -49,10 +50,18 @@ func (m *TokenManager) CreateAccessToken(userID uuid.UUID, email, role string) (
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(m.accessTokenSecret))
+
+	signedToken, err := token.SignedString([]byte(m.accessTokenSecret))
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return signedToken, expiresAt, nil
 }
 
-func (m *TokenManager) CreateRefreshToken(userID uuid.UUID) (string, error) {
+func (m *TokenManager) CreateRefreshToken(userID uuid.UUID) (string, time.Time, error) {
+	expiresAt := time.Now().Add(m.refreshTokenTTL)
+
 	now := time.Now()
 	claims := jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(now.Add(m.refreshTokenTTL)),
@@ -62,7 +71,12 @@ func (m *TokenManager) CreateRefreshToken(userID uuid.UUID) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(m.refreshTokenSecret))
+	signedToken, err := token.SignedString([]byte(m.refreshTokenSecret))
+	if err != nil {
+		return "", time.Time{}, err
+	}
+
+	return signedToken, expiresAt, nil
 }
 
 func (m *TokenManager) ValidateAccessToken(tokenString string) (*Claims, error) {

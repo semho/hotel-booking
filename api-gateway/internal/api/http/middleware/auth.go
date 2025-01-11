@@ -2,7 +2,7 @@ package middleware
 
 import (
 	"context"
-	"github.com/semho/hotel-booking/api-gateway/internal/app"
+	"github.com/semho/hotel-booking/api-gateway/internal/constants"
 	"github.com/semho/hotel-booking/pkg/logger"
 	pb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 	"net/http"
@@ -63,7 +63,7 @@ func (m *AuthMiddleware) ValidateToken(next http.Handler) http.Handler {
 			}
 
 			// Добавляем информацию о пользователе в контекст
-			ctx := context.WithValue(r.Context(), app.USER, resp.User)
+			ctx := context.WithValue(r.Context(), constants.USER, resp.User)
 			logger.Log.Info(
 				"token validated successfully",
 				"user_id", resp.User.Id,

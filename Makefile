@@ -131,3 +131,20 @@ stop-services:
 	docker-compose -f booking-service/deployments/docker-compose.yml down
 	docker-compose -f api-gateway/deployments/docker-compose.yml down
 	docker-compose -f infrastructure/swagger/docker-compose.yml down
+
+.PHONY: dev-up dev-down
+
+# Запуск всех сервисов в режиме локальной разработки
+dev-up:
+	$(MAKE) -C room-service dev-up
+	$(MAKE) -C booking-service dev-up
+	$(MAKE) -C auth-service dev-up
+	$(MAKE) -C api-gateway dev-up
+
+
+# Остановка всех сервисов
+dev-down:
+	$(MAKE) -C room-service dev-down
+	$(MAKE) -C booking-service dev-down
+	$(MAKE) -C auth-service dev-down
+	$(MAKE) -C api-gateway dev-down

@@ -1,37 +1,69 @@
-http:
-  port: 8080
-
-booking_service:
-  address: "booking-service:9092"
-
-auth_service:
-  address: "auth-service:9092"
-
-room_service:
-  address: "room-service:9092"
-
-cors:
-  origins:
-    - "http://localhost:8081"
-    - "http://127.0.0.1:8081"
-  methods:
-    - "GET"
-    - "POST"
-    - "PUT"
-    - "PATCH"
-    - "DELETE"
-    - "OPTIONS"
-  headers:
-    - "Accept"
-    - "Authorization"
-    - "Content-Type"
-    - "X-CSRF-Token"
-    - "X-Requested-With"
-    - "Force-Country-Code"
-    - "Geo-Ip-2-Country"
-  exposed_headers:
-    - "Link"
-    - "Set-Cookie"
-  credentials: true
-  max_age: 300
-  debug: true
+environments:
+  development:
+    http:
+      port: 8080
+    booking_service:
+      address: "localhost:9092"
+    auth_service:
+      address: "localhost:9091" # Локальные адреса для разработки
+    room_service:
+      address: "localhost:9093"
+    cors:
+      origins:
+        - "http://localhost:8081"
+        - "http://127.0.0.1:8081"
+      methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "PATCH"
+        - "DELETE"
+        - "OPTIONS"
+      headers:
+        - "Accept"
+        - "Authorization"
+        - "Content-Type"
+        - "X-CSRF-Token"
+        - "X-Requested-With"
+        - "Force-Country-Code"
+        - "Geo-Ip-2-Country"
+      exposed_headers:
+        - "Link"
+        - "Set-Cookie"
+      credentials: true
+      max_age: 300
+      debug: true
+  production:
+    http:
+      port: 8080
+    booking_service:
+      address: "booking-service:9092"
+    auth_service:
+      address: "auth-service:9092"
+    room_service:
+      address: "room-service:9092"
+    cors:
+      origins:
+        - "http://localhost:8081"
+        - "http://127.0.0.1:8081"
+      methods:
+        - "GET"
+        - "POST"
+        - "PUT"
+        - "PATCH"
+        - "DELETE"
+        - "OPTIONS"
+      headers:
+        - "Accept"
+        - "Authorization"
+        - "Content-Type"
+        - "X-CSRF-Token"
+        - "X-Requested-With"
+        - "Force-Country-Code"
+        - "Geo-Ip-2-Country"
+      exposed_headers:
+        - "Link"
+        - "Set-Cookie"
+      credentials: true
+      max_age: 300
+      debug: true # TODO: убрать для прода

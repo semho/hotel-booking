@@ -3,12 +3,14 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type Config struct {
-	DB   DBConfig   `mapstructure:"db"`
-	GRPC GRPCConfig `mapstructure:"grpc"`
-	JWT  JWTConfig  `mapstructure:"jwt"`
+	Environment string     `mapstructure:"environment"`
+	DB          DBConfig   `mapstructure:"db"`
+	GRPC        GRPCConfig `mapstructure:"grpc"`
+	JWT         JWTConfig  `mapstructure:"jwt"`
 }
 
 type DBConfig struct {
@@ -39,21 +41,29 @@ func Load() (*Config, error) {
 	v.AddConfigPath("./config")
 	v.AddConfigPath("../config")
 
+	environment := os.Getenv("APP_ENV")
+	if environment == "" {
+		environment = "development"
+	}
+
+	v.SetDefault("environment", environment)
 	// Настройка переменных окружения
 	v.AutomaticEnv()
 	//v.SetEnvPrefix("AUTH")
 
 	// Явное сопоставление переменных окружения с полями конфига
-	v.BindEnv("db.host", "DB_HOST")
-	v.BindEnv("db.port", "DB_PORT")
-	v.BindEnv("db.user", "DB_USER")
-	v.BindEnv("db.password", "DB_PASSWORD")
-	v.BindEnv("db.name", "DB_NAME")
-	v.BindEnv("grpc.port", "GRPC_PORT")
-	v.BindEnv("jwt.access_token_secret", "JWT_ACCESS_SECRET")
-	v.BindEnv("jwt.refresh_token_secret", "JWT_REFRESH_SECRET")
-	v.BindEnv("jwt.access_token_ttl", "JWT_ACCESS_TTL")
-	v.BindEnv("jwt.refresh_token_ttl", "JWT_REFRESH_TTL")
+	if environment == "production" {
+		v.BindEnv("db.host", "DB_HOST")
+		v.BindEnv("db.port", "DB_PORT")
+		v.BindEnv("db.user", "DB_USER")
+		v.BindEnv("db.password", "DB_PASSWORD")
+		v.BindEnv("db.name", "DB_NAME")
+		v.BindEnv("grpc.port", "GRPC_PORT")
+		v.BindEnv("jwt.access_token_secret", "JWT_ACCESS_SECRET")
+		v.BindEnv("jwt.refresh_token_secret", "JWT_REFRESH_SECRET")
+		v.BindEnv("jwt.access_token_ttl", "JWT_ACCESS_TTL")
+		v.BindEnv("jwt.refresh_token_ttl", "JWT_REFRESH_TTL")
+	}
 
 	// Загрузка конфигурации
 	if err := v.ReadInConfig(); err != nil {
@@ -63,7 +73,7 @@ func Load() (*Config, error) {
 	}
 
 	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
+	if err := v.UnmarshalKey("environments."+environment, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 

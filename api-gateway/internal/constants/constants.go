@@ -1,3 +1,3 @@
-package app
+package constants
 
 const USER = "user"

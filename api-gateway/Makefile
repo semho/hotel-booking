@@ -8,6 +8,3 @@ dev-down:
 	chmod +x ./deployments/dev-down.sh && ./deployments/dev-down.sh
 
 dev-restart: dev-down dev-up
-
-dev-logs:
-	docker-compose -f deployments/docker-compose.dev.yml logs -f

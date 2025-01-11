@@ -2,11 +2,13 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/viper"
 )
 
 type Config struct {
+	Environment    string               `mapstructure:"environment"`
 	HTTP           HTTPConfig           `mapstructure:"http"`
 	BookingService BookingServiceConfig `mapstructure:"booking_service"`
 	AuthService    AuthServiceConfig    `mapstructure:"auth_service"`
@@ -49,16 +51,24 @@ func Load() (*Config, error) {
 	v.AddConfigPath("./config")
 	v.AddConfigPath("../config")
 
+	environment := os.Getenv("APP_ENV")
+	if environment == "" {
+		environment = "development"
+	}
+
+	v.SetDefault("environment", environment)
 	// Настройка переменных окружения
 	v.AutomaticEnv()
 	// Убираем префикс APP
 	// v.SetEnvPrefix("APP")
 
 	// Явное сопоставление переменных окружения с полями конфига
-	v.BindEnv("http.port", "HTTP_PORT")
-	v.BindEnv("booking_service.address", "BOOKING_SERVICE_ADDR")
-	v.BindEnv("auth_service.address", "AUTH_SERVICE_ADDR")
-	v.BindEnv("room_service.address", "ROOM_SERVICE_ADDR")
+	if environment == "production" {
+		v.BindEnv("http.port", "HTTP_PORT")
+		v.BindEnv("booking_service.address", "BOOKING_SERVICE_ADDR")
+		v.BindEnv("auth_service.address", "AUTH_SERVICE_ADDR")
+		v.BindEnv("room_service.address", "ROOM_SERVICE_ADDR")
+	}
 
 	// Загрузка конфигурации
 	if err := v.ReadInConfig(); err != nil {
@@ -68,7 +78,7 @@ func Load() (*Config, error) {
 	}
 
 	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
+	if err := v.UnmarshalKey("environments."+environment, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 

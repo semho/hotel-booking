@@ -3,9 +3,11 @@ package config
 import (
 	"fmt"
 	"github.com/spf13/viper"
+	"os"
 )
 
 type Config struct {
+	Environment string            `mapstructure:"environment"`
 	DB          DBConfig          `mapstructure:"db"`
 	GRPC        GRPCConfig        `mapstructure:"grpc"`
 	RoomService RoomServiceConfig `mapstructure:"room_service"`
@@ -30,7 +32,13 @@ type RoomServiceConfig struct {
 func Load() (*Config, error) {
 	v := viper.New()
 
-	// 1. Настройка переменных окружения (без префикса)
+	environment := os.Getenv("APP_ENV")
+	if environment == "" {
+		environment = "development"
+	}
+
+	v.SetDefault("environment", environment)
+	// 1. Настройка переменных окружения
 	v.AutomaticEnv()
 
 	// 2. Настройка конфига
@@ -40,13 +48,15 @@ func Load() (*Config, error) {
 	v.AddConfigPath("../config")
 
 	// 3. Явное сопоставление переменных окружения с полями конфига
-	v.BindEnv("db.host", "DB_HOST")
-	v.BindEnv("db.port", "DB_PORT")
-	v.BindEnv("db.user", "DB_USER")
-	v.BindEnv("db.password", "DB_PASSWORD")
-	v.BindEnv("db.name", "DB_NAME")
-	v.BindEnv("grpc.port", "GRPC_PORT")
-	v.BindEnv("room_service.address", "ROOM_SERVICE_ADDR")
+	if environment == "production" {
+		v.BindEnv("db.host", "DB_HOST")
+		v.BindEnv("db.port", "DB_PORT")
+		v.BindEnv("db.user", "DB_USER")
+		v.BindEnv("db.password", "DB_PASSWORD")
+		v.BindEnv("db.name", "DB_NAME")
+		v.BindEnv("grpc.port", "GRPC_PORT")
+		v.BindEnv("room_service.address", "ROOM_SERVICE_ADDR")
+	}
 
 	// 4. Загрузка конфига
 	if err := v.ReadInConfig(); err != nil {
@@ -56,7 +66,7 @@ func Load() (*Config, error) {
 	}
 
 	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
+	if err := v.UnmarshalKey("environments."+environment, &cfg); err != nil {
 		return nil, fmt.Errorf("failed to unmarshal config: %w", err)
 	}
 

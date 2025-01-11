@@ -25,6 +25,7 @@ type Deps struct {
 
 func initDeps(cfg *config.Config) (*Deps, error) {
 	// Устанавливаем соединение с booking service
+	logger.Log.Info("connecting to booking service", "address", cfg.BookingService.Address)
 	bookingConn, err := grpc.NewClient(
 		cfg.BookingService.Address,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),

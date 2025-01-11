@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/semho/hotel-booking/api-gateway/internal/app"
+	"github.com/semho/hotel-booking/api-gateway/internal/constants"
 	"net/http"
 	"time"
 
@@ -213,7 +213,7 @@ func (h *BookingHandler) respondWithError(w http.ResponseWriter, code int, err e
 // TODO: заглушка до реализации
 func (h *BookingHandler) CreateBooking(w http.ResponseWriter, r *http.Request) {
 	// Получаем данные пользователя из контекста (установленные в AuthMiddleware)
-	userInfo, ok := r.Context().Value(app.USER).(*authpb.UserInfo)
+	userInfo, ok := r.Context().Value(constants.USER).(*authpb.UserInfo)
 	if !ok {
 		http.Error(w, "unauthorized", http.StatusUnauthorized)
 		return

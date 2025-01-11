@@ -50,7 +50,7 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 	}
 
 	// Создаем токены
-	accessToken, err := s.tokenManager.CreateAccessToken(
+	accessToken, accessExp, err := s.tokenManager.CreateAccessToken(
 		user.ID,
 		user.Email,
 		string(user.Role),
@@ -59,15 +59,17 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 		return nil, err
 	}
 
-	refreshToken, err := s.tokenManager.CreateRefreshToken(user.ID)
+	refreshToken, refreshExp, err := s.tokenManager.CreateRefreshToken(user.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.AuthResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		User:         user,
+		AccessToken:           accessToken,
+		RefreshToken:          refreshToken,
+		AccessTokenExpiresAt:  accessExp,
+		RefreshTokenExpiresAt: refreshExp,
+		User:                  user,
 	}, nil
 }
 
@@ -87,7 +89,7 @@ func (s *authService) Login(ctx context.Context, email, password string) (*model
 	}
 
 	// Создаем токены
-	accessToken, err := s.tokenManager.CreateAccessToken(
+	accessToken, accessExp, err := s.tokenManager.CreateAccessToken(
 		user.ID,
 		user.Email,
 		string(user.Role),
@@ -96,7 +98,7 @@ func (s *authService) Login(ctx context.Context, email, password string) (*model
 		return nil, err
 	}
 
-	refreshToken, err := s.tokenManager.CreateRefreshToken(user.ID)
+	refreshToken, refreshExp, err := s.tokenManager.CreateRefreshToken(user.ID)
 	if err != nil {
 		return nil, err
 	}
@@ -108,9 +110,11 @@ func (s *authService) Login(ctx context.Context, email, password string) (*model
 	)
 
 	return &model.AuthResponse{
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-		User:         user,
+		AccessToken:           accessToken,
+		RefreshToken:          refreshToken,
+		AccessTokenExpiresAt:  accessExp,
+		RefreshTokenExpiresAt: refreshExp,
+		User:                  user,
 	}, nil
 }
 
@@ -144,7 +148,7 @@ func (s *authService) RefreshTokens(ctx context.Context, refreshToken string) (*
 	}
 
 	// Создаем новые токены
-	accessToken, err := s.tokenManager.CreateAccessToken(
+	accessToken, accessExp, err := s.tokenManager.CreateAccessToken(
 		user.ID,
 		user.Email,
 		string(user.Role),
@@ -153,14 +157,16 @@ func (s *authService) RefreshTokens(ctx context.Context, refreshToken string) (*
 		return nil, err
 	}
 
-	newRefreshToken, err := s.tokenManager.CreateRefreshToken(user.ID)
+	newRefreshToken, refreshExp, err := s.tokenManager.CreateRefreshToken(user.ID)
 	if err != nil {
 		return nil, err
 	}
 
 	return &model.AuthResponse{
-		AccessToken:  accessToken,
-		RefreshToken: newRefreshToken,
-		User:         user,
+		AccessToken:           accessToken,
+		RefreshToken:          newRefreshToken,
+		AccessTokenExpiresAt:  accessExp,
+		RefreshTokenExpiresAt: refreshExp,
+		User:                  user,
 	}, nil
 }

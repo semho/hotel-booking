@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/semho/hotel-booking/auth-service/internal/config"
+	"github.com/semho/hotel-booking/api-gateway/internal/config"
 	"os"
 )
 
@@ -11,5 +11,5 @@ func main() {
 	if err != nil {
 		os.Exit(1)
 	}
-	fmt.Print(cfg.GRPC.Port)
+	fmt.Print(cfg.HTTP.Port)
 }

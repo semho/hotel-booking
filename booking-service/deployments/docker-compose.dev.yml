@@ -1,22 +1,22 @@
 services:
-  room-db:
+  booking-db:
     image: postgres:16-alpine
-    container_name: room-db-dev
+    container_name: booking-db-dev
     environment:
-      - POSTGRES_DB=room_service
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
     ports:
       - "5432:5432"
     volumes:
-      - room-db-dev-data:/var/lib/postgresql/data
+      - booking-db-dev-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d room_service"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d booking_service"]
       interval: 5s
       timeout: 5s
       retries: 5
       start_period: 10s
 
 volumes:
-  room-db-dev-data:
-    name: room-db-dev-data
+  booking-db-dev-data:
+    name: booking-db-dev-data

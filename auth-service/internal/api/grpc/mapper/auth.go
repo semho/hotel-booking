@@ -8,9 +8,11 @@ import (
 
 func ToProtoAuthResponse(resp *model.AuthResponse) *pb.AuthResponse {
 	return &pb.AuthResponse{
-		AccessToken:  resp.AccessToken,
-		RefreshToken: resp.RefreshToken,
-		User:         ToProtoUser(resp.User),
+		AccessToken:           resp.AccessToken,
+		RefreshToken:          resp.RefreshToken,
+		AccessTokenExpiresAt:  timestamppb.New(resp.AccessTokenExpiresAt),
+		RefreshTokenExpiresAt: timestamppb.New(resp.RefreshTokenExpiresAt),
+		User:                  ToProtoUser(resp.User),
 	}
 }
 
