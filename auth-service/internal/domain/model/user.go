@@ -2,15 +2,12 @@ package model
 
 import (
 	"github.com/google/uuid"
+	pb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 	"time"
 )
 
-type UserRole string
-
-const (
-	UserRoleUser  UserRole = "USER"
-	UserRoleAdmin UserRole = "ADMIN"
-)
+// type UserRole string
+type UserRole = pb.UserRole
 
 type User struct {
 	ID        uuid.UUID `db:"id"`

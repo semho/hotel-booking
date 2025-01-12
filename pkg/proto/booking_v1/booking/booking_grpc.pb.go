@@ -22,11 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type BookingServiceClient interface {
-	// TODO: убрать
-	// GetAvailableRooms returns list of available rooms based on search criteria
-	// and current bookings
 	GetAvailableRooms(ctx context.Context, in *GetAvailableRoomsRequest, opts ...grpc.CallOption) (*GetAvailableRoomsResponse, error)
-	CheckRoomsAvailability(ctx context.Context, in *CheckRoomsAvailabilityRequest, opts ...grpc.CallOption) (*CheckRoomsAvailabilityResponse, error)
 	CreateBooking(ctx context.Context, in *CreateBookingRequest, opts ...grpc.CallOption) (*CreateBookingResponse, error)
 	// UpdateBookingStatus updates booking status
 	UpdateBookingStatus(ctx context.Context, in *UpdateBookingStatusRequest, opts ...grpc.CallOption) (*UpdateBookingStatusResponse, error)
@@ -43,15 +39,6 @@ func NewBookingServiceClient(cc grpc.ClientConnInterface) BookingServiceClient {
 func (c *bookingServiceClient) GetAvailableRooms(ctx context.Context, in *GetAvailableRoomsRequest, opts ...grpc.CallOption) (*GetAvailableRoomsResponse, error) {
 	out := new(GetAvailableRoomsResponse)
 	err := c.cc.Invoke(ctx, "/hotel.booking.v1.BookingService/GetAvailableRooms", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *bookingServiceClient) CheckRoomsAvailability(ctx context.Context, in *CheckRoomsAvailabilityRequest, opts ...grpc.CallOption) (*CheckRoomsAvailabilityResponse, error) {
-	out := new(CheckRoomsAvailabilityResponse)
-	err := c.cc.Invoke(ctx, "/hotel.booking.v1.BookingService/CheckRoomsAvailability", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,11 +67,7 @@ func (c *bookingServiceClient) UpdateBookingStatus(ctx context.Context, in *Upda
 // All implementations must embed UnimplementedBookingServiceServer
 // for forward compatibility
 type BookingServiceServer interface {
-	// TODO: убрать
-	// GetAvailableRooms returns list of available rooms based on search criteria
-	// and current bookings
 	GetAvailableRooms(context.Context, *GetAvailableRoomsRequest) (*GetAvailableRoomsResponse, error)
-	CheckRoomsAvailability(context.Context, *CheckRoomsAvailabilityRequest) (*CheckRoomsAvailabilityResponse, error)
 	CreateBooking(context.Context, *CreateBookingRequest) (*CreateBookingResponse, error)
 	// UpdateBookingStatus updates booking status
 	UpdateBookingStatus(context.Context, *UpdateBookingStatusRequest) (*UpdateBookingStatusResponse, error)
@@ -97,9 +80,6 @@ type UnimplementedBookingServiceServer struct {
 
 func (UnimplementedBookingServiceServer) GetAvailableRooms(context.Context, *GetAvailableRoomsRequest) (*GetAvailableRoomsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetAvailableRooms not implemented")
-}
-func (UnimplementedBookingServiceServer) CheckRoomsAvailability(context.Context, *CheckRoomsAvailabilityRequest) (*CheckRoomsAvailabilityResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CheckRoomsAvailability not implemented")
 }
 func (UnimplementedBookingServiceServer) CreateBooking(context.Context, *CreateBookingRequest) (*CreateBookingResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBooking not implemented")
@@ -134,24 +114,6 @@ func _BookingService_GetAvailableRooms_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(BookingServiceServer).GetAvailableRooms(ctx, req.(*GetAvailableRoomsRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _BookingService_CheckRoomsAvailability_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CheckRoomsAvailabilityRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(BookingServiceServer).CheckRoomsAvailability(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/hotel.booking.v1.BookingService/CheckRoomsAvailability",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(BookingServiceServer).CheckRoomsAvailability(ctx, req.(*CheckRoomsAvailabilityRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -202,10 +164,6 @@ var BookingService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetAvailableRooms",
 			Handler:    _BookingService_GetAvailableRooms_Handler,
-		},
-		{
-			MethodName: "CheckRoomsAvailability",
-			Handler:    _BookingService_CheckRoomsAvailability_Handler,
 		},
 		{
 			MethodName: "CreateBooking",

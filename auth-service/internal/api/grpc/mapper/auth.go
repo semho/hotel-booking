@@ -23,20 +23,9 @@ func ToProtoUser(user *model.User) *pb.UserInfo {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Phone:     user.Phone,
-		Role:      ToProtoUserRole(user.Role),
+		Role:      user.Role,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		UpdatedAt: timestamppb.New(user.UpdatedAt),
-	}
-}
-
-func ToProtoUserRole(role model.UserRole) pb.UserRole {
-	switch role {
-	case model.UserRoleAdmin:
-		return pb.UserRole_USER_ROLE_ADMIN
-	case model.UserRoleUser:
-		return pb.UserRole_USER_ROLE_USER
-	default:
-		return pb.UserRole_USER_ROLE_UNSPECIFIED
 	}
 }
 
@@ -47,7 +36,7 @@ func ToProtoUserInfo(user *model.User) *pb.UserInfo {
 		FirstName: user.FirstName,
 		LastName:  user.LastName,
 		Phone:     user.Phone,
-		Role:      ToProtoUserRole(user.Role),
+		Role:      user.Role,
 		CreatedAt: timestamppb.New(user.CreatedAt),
 		UpdatedAt: timestamppb.New(user.UpdatedAt),
 	}

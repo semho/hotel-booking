@@ -8,6 +8,7 @@ import (
 	"github.com/semho/hotel-booking/pkg/auth/jwt"
 	"github.com/semho/hotel-booking/pkg/errors"
 	"github.com/semho/hotel-booking/pkg/logger"
+	pb "github.com/semho/hotel-booking/pkg/proto/auth_v1/auth"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -42,7 +43,7 @@ func (s *authService) Register(ctx context.Context, req *model.RegisterRequest) 
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Phone:     req.Phone,
-		Role:      model.UserRoleUser,
+		Role:      pb.UserRole_USER_ROLE_USER,
 	}
 
 	if err = s.userRepo.Create(ctx, user); err != nil {
